@@ -1,0 +1,61 @@
+---
+title: "loopview"
+subtitle: "A local debugger for AI agents, whatever framework they're built with"
+description: "I built loopview, an open-source debugger that draws any AI agent's run as a live graph from standard OpenTelemetry. Published on PyPI."
+order: 2
+color: "lilac"
+logo: "loopview/logo.svg"
+facts:
+  - { label: "Role", value: "Author" }
+  - { label: "Dates", value: "Oct 2026 · first release Oct 2026" }
+  - { label: "Team", value: "Solo" }
+  - { label: "Stack", value: "Python, FastAPI, OpenTelemetry (OTLP), Server-Sent Events, React 19, TypeScript, React Flow, ELK" }
+  - { label: "Status", value: "Published on PyPI · Apache-2.0" }
+next: "multi-agent-support"
+---
+
+I built **loopview**, a local debugger for AI agents. It receives standard **OpenTelemetry** traces and draws each run as a **live graph**: agents as groups, steps as cards, edges for sequence, parallel fan-out and fan-in, loops and handoffs. It's **published on PyPI** and runs on your machine: one process, one port, no account, no database.
+
+<AnimatedFigure poster="loopview/demo-poster.png" src="/loopview-demo.webp" alt="loopview replaying a multi-agent run: a supervisor splits the work, three analysts run in parallel, a tool fails and is retried, a critic sends the draft back, a writer finishes." />
+
+<Install command="uvx loopview demo" />
+
+<LinkRow links={[
+  { label: "Live demo", href: "https://yasminezerai.github.io/loopview/" },
+  { label: "GitHub", href: "https://github.com/YasmineZerai/loopview" },
+  { label: "PyPI", href: "https://pypi.org/project/loopview/" },
+]} />
+
+## Problem
+
+When an agent's answer is wrong, slow or expensive, the question is always **what happened**, and a flat list of spans makes you rebuild it in your head. Many debugging tools also come with one framework: switch frameworks and you switch tools.
+
+## What I built
+
+- **One view for every framework:** LangGraph, Pydantic AI, **CrewAI**, the **OpenAI Agents SDK** and hand-written loops, normalized into one schema.
+- **Every step, opened up:** the model's thinking and the exact arguments of every tool call it made.
+- **A cost tree** that shows where the tokens and dollars went, down to system prompt, tool definitions, history, cache, thinking and reply.
+- **A Tools tab** that shows, across many runs, how each tool fails and what the agent did next.
+
+<Figure src="loopview/step-details.png" alt="A step opened in loopview's graph: the writer agent's model call shows the model's thinking in full, then the exact tool call it made, format_table, with every argument, the model name, tokens and duration." caption="Open any step to see what the model was thinking and the exact arguments of every tool call it made." />
+
+<Figure src="loopview/screenshot-cost.png" alt="The cost tree: the run's trunk branches into agents and steps, each branch as thick as its cost, and the most expensive step opens into what its tokens were spent on." caption="The cost tree. Each branch is as thick as the money flowing through it." />
+
+<Figure src="loopview/screenshot-tools.png" alt="The Tools tab over 26 runs: three findings at the top, then a table of tools sorted by errors, one opened to show its most common error and the failing call's arguments." caption="The Tools tab. Over 20 tasks on GitHub's MCP server, the agents changed course after 4 of their 5 tool errors." />
+
+## Results
+
+- **Published on PyPI** as two packages: `loopview` (the server, which ships the built UI) and `loopview-sdk` (`connect()`, `agent()`, `@tool`), released through GitHub Actions with PyPI trusted publishing.
+- **One view** for LangGraph, Pydantic AI, CrewAI, the OpenAI Agents SDK and hand-written loops, each checked against recorded traces.
+- The Tools tab surfaces findings no single trace shows: over 20 tasks on GitHub's MCP server, the agents were offered **15 tools they never called**, whose definitions cost **about 138,000 tokens**.
+- A [live demo](https://yasminezerai.github.io/loopview/) anyone can open in a browser, with nothing to install.
+
+<More title="More details: how it works">
+
+**How it works.** A Python server (FastAPI) receives OTLP traces, groups spans into runs, and a normalizer with one adapter per convention (OTel GenAI, OpenInference, plain spans) turns them into agents, steps, model calls and tool calls. Control flow comes from one rule: within the same agent, A leads to B when A ended before B started and nothing sits between them. That gives sequences, parallel fan-out and fan-in, loops and handoffs. Every 100 ms, changed steps go to the browser over **Server-Sent Events**.
+
+**The UI** is React 19 and TypeScript, with React Flow and ELK layout in a Web Worker. Replay runs from 0.5x to 4x, with a timeline, light and dark themes, and export and import of runs.
+
+**Runs on your machine:** one process, one port, no account, no database.
+
+</More>

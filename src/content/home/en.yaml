@@ -1,0 +1,161 @@
+# Home page copy (English). Facts come from portfolio-kit/CONTENT.md (sections 1 to 6 and 2b).
+# Inline **bold** and `code` are rendered as Markdown.
+# Colours: peach, mint, lilac, sky (pastel themes defined in src/styles/global.css).
+
+meta:
+  title: "Yasmine Zerai · AI Engineer"
+  description: "AI Engineer. I build LLM agents that run in production, and the tools to debug them. Open to relocation, available January or February 2027."
+
+hero:
+  greeting: "Hi, I'm"
+  name: "Yasmine Zerai"
+  photo_alt: "Yasmine Zerai, smiling, outdoors in front of green leaves."
+  roles_prefix: "I build"
+  roles:
+    - "LLM agents that run in production"
+    - "tools to debug AI agents"
+    - "AI platforms for IoT fleets"
+    - "multi-agent systems with RAG"
+  headline: "AI Engineer. I build LLM agents that run in production, and the tools to debug them."
+  intro: "I'm a **final-year Software Engineering student** at INSAT and an **AI engineer**. I build **LLM agents**, **RAG** systems and the backends around them, and I've shipped them to **production** and to **open source**. I care about **AI you can trust**: agents that look before they act, and answers you can trace back to their evidence."
+  proof:
+    - { count: 2000, suffix: "+", label: "IoT devices on the platform I built", color: "peach" }
+    - { count: 1, suffix: " year+", label: "of professional AI engineering experience", color: "mint" }
+    - { count: 2, suffix: "", label: "open-source packages published on PyPI", color: "lilac" }
+  availability: "Open to relocation · Available January or February 2027"
+  buttons:
+    - { label: "View CV", href: "/cv.pdf" }
+    - { label: "Email me", href: "mailto:zeraiyasmine7@gmail.com" }
+    - { label: "GitHub", href: "https://github.com/YasmineZerai" }
+    - { label: "LinkedIn", href: "https://www.linkedin.com/in/yasmine-zerai-9027552a4" }
+
+work:
+  heading: "Selected work"
+  intro: "Three things I built, from production to open source."
+  cards:
+    - slug: "beekeeper"
+      color: "peach"
+      kicker: "Production AI · Aug 2025 to present"
+      title: "Beekeeper Tech"
+      logo: "beekeeper/logo-v2.png"
+      visual:
+        kind: "collage"
+        alt: "Photos from Beekeeper Tech."
+        images:
+          - { src: "beekeeper/office.jpg", alt: "My desk at Beekeeper Tech: a laptop showing sensor charts, with the company logo on the wall behind.", position: "0% 50%" }
+          - { src: "beekeeper/office-selfie.jpg", alt: "Me at the Beekeeper Tech office, pointing at the company logo on the wall.", position: "70% 30%" }
+          - { src: "beekeeper/platform-sunset-v2.jpg", alt: "The platform's sign-in screen on my laptop, with the office terrace at sunset behind it.", position: "50% 72%" }
+      summary: "I built and owned the production platform of an IoT startup for bee colony monitoring: the MQTT link to the hives, the AI agent and the health score."
+      badges: ["2,000+ devices", "Agent in production"]
+      proof:
+        - "My ReAct agent **replaced the manual review of sensor data completely**"
+        - "My **Brood Presence Confidence** model, calibrated on the fleet's sensor history, is **in production**"
+      stack: ["FastAPI", "MongoDB", "MQTT", "React", "LangChain", "Docker", "AWS"]
+      cta: "Read the case study"
+
+    - slug: "loopview"
+      color: "lilac"
+      kicker: "Open source · on PyPI"
+      title: "loopview"
+      logo: "loopview/logo.svg"
+      visual: { kind: "image", src: "loopview/card-graph-light.png", alt: "loopview's graph view: a coordinator agent hands work to two researcher agents running in parallel, each looping between its model and its tools, then a writer agent finishes." }
+      summary: "I built a local debugger that draws any AI agent's run as a live graph, from standard OpenTelemetry traces."
+      badges: ["On PyPI", "53 design decisions", "Live demo"]
+      proof:
+        - "**One view** for LangGraph, Pydantic AI, CrewAI, the OpenAI Agents SDK and hand-written loops"
+        - "Try it: `uvx loopview demo`"
+      stack: ["Python", "FastAPI", "OpenTelemetry", "React 19", "TypeScript", "React Flow"]
+      cta: "Read the case study"
+      links:
+        - { label: "Live demo", href: "https://yasminezerai.github.io/loopview/" }
+        - { label: "GitHub README", href: "https://github.com/YasmineZerai/loopview#readme" }
+
+    - slug: "multi-agent-support"
+      color: "mint"
+      kicker: "Academic · team of 4"
+      title: "Multi-agent customer support"
+      visual: { kind: "image", src: "pfa/dashboard-overview.png", alt: "Admin dashboard of the support system: open tickets, active sessions, average resolution time and escalation rate, ticket volume by type over 7 days, and how requests were routed across the five agents." }
+      summary: "I built the five specialized agents of a multi-agent customer support system, and the shared loop they run on."
+      badges: ["14/14 tests passing", "5 agents", "Team of 4"]
+      proof:
+        - "Agents **must look before they act**: the architecture enforces it, not the prompt"
+        - "An ordered double search stopped refunds on orders **delivered 46 days earlier**"
+      stack: ["LangGraph", "FastAPI", "Pinecone", "RAG", "PostgreSQL", "MongoDB"]
+      cta: "Read the case study"
+      links:
+        - { label: "GitHub README", href: "https://github.com/YasmineZerai/PFA-ai-customer-service-system#readme" }
+        - { label: "Read the report", href: "/pfa-report.pdf" }
+
+looking:
+  heading: "What I'm looking for"
+  title: "An end-of-studies internship (PFE) in AI engineering"
+  text: "I want to build LLM agents that ship: agents that make real decisions, the tools they call, the RAG behind them, and the tooling to see what they did. I've done it in production and in open source, and I want to keep doing it in a team that ships."
+  chips:
+    - { label: "Starts January or February 2027", color: "peach" }
+    - { label: "Open to relocation", color: "mint" }
+    - { label: "LLM agents · RAG · evaluation", color: "lilac" }
+    - { label: "French C1 · English C1 · Arabic native", color: "sky" }
+
+experience:
+  heading: "Experience"
+  items:
+    - dates: "Aug 2025 to present"
+      role: "AI & Data Science Engineer"
+      org: "Beekeeper Tech, an IoT startup for bee colony monitoring"
+      logo: "beekeeper/logo-v2.png"
+      color: "peach"
+      text: "I prototyped the platform in Streamlit, then rebuilt it and owned it end to end, from architecture to deployment: the MQTT service, the AI agent that replaced manual sensor review, and the colony health score. I delivered it to **government and international organisation clients** and presented it in **two product demos**."
+      tags: ["FastAPI", "MongoDB", "MQTT", "LangChain", "React"]
+    - dates: "Aug 2025"
+      role: "Bootcamp instructor"
+      org: "Opus Lab"
+      logo: "opuslab/logo.png"
+      color: "lilac"
+      text: "I was invited back to design and teach a **4-week bootcamp** to **15+ junior developers**, rated **4.7/5**."
+      tags: ["Teaching", "Curriculum design"]
+    - dates: "May to Jul 2025"
+      role: "Full-stack intern"
+      org: "Opus Lab"
+      logo: "opuslab/logo.png"
+      color: "mint"
+      text: "I worked on Next.js, Nest.js and MongoDB in TypeScript, and set up QA where there was none."
+      tags: ["Next.js", "Nest.js", "MongoDB", "TypeScript"]
+
+education:
+  heading: "Education"
+  school: "INSAT"
+  degree: "Software Engineering degree (Master's equivalent)"
+  dates: "Sept 2022 to May 2027"
+  details: "Final year, graduating in 2027."
+
+skills:
+  heading: "Skills"
+  intro: "What I use, grouped by where I use it."
+  groups:
+    - name: "AI / LLM"
+      color: "lilac"
+      items: ["Python", "LangGraph", "LangChain", "OpenAI API (function calling)", "Anthropic SDK", "Pydantic AI", "Gemini API", "RAG", "ReAct agents", "multi-agent orchestration", "tool design", "embeddings", "semantic chunking", "Pinecone", "OpenTelemetry", "evaluation"]
+    - name: "ML / data"
+      color: "peach"
+      items: ["Scikit-learn", "TensorFlow/Keras", "Pandas", "NumPy", "time-series data", "feature engineering", "model evaluation", "SQL", "ETL pipelines"]
+    - name: "Backend"
+      color: "mint"
+      items: ["FastAPI", "async Python", "Node.js", "Nest.js", "REST", "WebSockets", "Server-Sent Events", "MQTT", "PostgreSQL", "MongoDB", "Redis"]
+    - name: "Frontend"
+      color: "sky"
+      items: ["React", "TypeScript", "Next.js", "Tailwind CSS", "Recharts", "React Flow"]
+    - name: "Infra"
+      color: "peach"
+      items: ["Docker", "AWS (EC2, S3)", "GitHub Actions", "CI/CD", "PyPI publishing", "Linux"]
+
+contact:
+  heading: "Contact"
+  title: "Looking for an AI engineering intern from January or February 2027?"
+  text: "Let's talk."
+  email: "zeraiyasmine7@gmail.com"
+  copy_label: "Copy email"
+  copied_label: "Copied!"
+  links:
+    - { label: "GitHub", href: "https://github.com/YasmineZerai" }
+    - { label: "LinkedIn", href: "https://www.linkedin.com/in/yasmine-zerai-9027552a4" }
+    - { label: "View CV", href: "/cv.pdf" }

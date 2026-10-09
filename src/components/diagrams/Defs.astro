@@ -1,0 +1,19 @@
+---
+// Arrowheads shared by every diagram. Ids are prefixed so several diagrams can sit on one page.
+interface Props {
+  uid: string;
+}
+const { uid } = Astro.props;
+---
+
+<defs>
+  <marker id={`${uid}-a`} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M0 1 9 5 0 9z" class="arrow"></path>
+  </marker>
+  <marker id={`${uid}-aa`} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M0 1 9 5 0 9z" class="arrow-accent"></path>
+  </marker>
+  <marker id={`${uid}-ab`} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M0 1 9 5 0 9z" class="arrow-bad"></path>
+  </marker>
+</defs>

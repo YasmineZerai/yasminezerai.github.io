@@ -1,0 +1,25 @@
+---
+import { Image } from 'astro:assets';
+import { image } from '../../lib/images';
+interface Props {
+  src: string;
+  alt: string;
+  caption?: string;
+}
+const { src, alt, caption } = Astro.props;
+const img = image(src);
+---
+
+<figure class="reveal my-8">
+  <div class="overflow-hidden rounded-2xl border border-line bg-surface shadow-[var(--shadow)]">
+    <Image
+      src={img}
+      alt={alt}
+      widths={[480, 800, 1200, Math.min(img.width, 1600)]}
+      sizes="(min-width: 768px) 46rem, 100vw"
+      loading="lazy"
+      class="h-auto w-full"
+    />
+  </div>
+  {caption && <figcaption class="mt-3 text-sm text-muted">{caption}</figcaption>}
+</figure>

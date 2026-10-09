@@ -1,0 +1,64 @@
+---
+import Defs from './Defs.astro';
+interface Props {
+  l: Record<string, any>;
+  uid: string;
+}
+const { l, uid } = Astro.props;
+const a = `url(#${uid}-a)`;
+const aa = `url(#${uid}-aa)`;
+const ab = `url(#${uid}-ab)`;
+---
+
+<Defs uid={uid} />
+
+<!-- Devices -->
+<rect class="box-2" x="10" y="70" width="120" height="52" rx="8"></rect>
+<text class="t-sm" x="70" y="101" text-anchor="middle">{l.devices}</text>
+<path class="edge" d="M130 96 H168" marker-end={a}></path>
+
+<!-- Tier 1 -->
+<rect class="box" x="170" y="20" width="230" height="176" rx="8"></rect>
+<text class="t" x="186" y="46">{l.tier1}</text>
+{l.tier1_checks.map((c: string, i: number) => <text class="m" x="186" y={74 + i * 20}>· {c}</text>)}
+<text class="m-accent" x="186" y="182">{l.tier1_cost}</text>
+
+<!-- Tier 1 output: template alert -->
+<path class="edge" d="M400 96 H448" marker-end={a}></path>
+<rect class="box-2" x="450" y="70" width="160" height="52" rx="8"></rect>
+<text class="t-sm" x="530" y="92" text-anchor="middle">{l.tier1_out.split(' ').slice(0, 1).join(' ')}</text>
+<text class="t-sm" x="530" y="110" text-anchor="middle">{l.tier1_out.split(' ').slice(1).join(' ')}</text>
+<path class="edge" d="M610 96 H638" marker-end={a}></path>
+
+<!-- Escalation to tier 2 -->
+<path class="edge-accent" d="M285 196 V258" marker-end={aa}></path>
+<text class="m-accent" x="297" y="232">{l.escalate}</text>
+<rect class="box-accent" x="170" y="260" width="230" height="60" rx="8"></rect>
+<text class="t-accent" x="285" y="295" text-anchor="middle">{l.tier2}</text>
+
+<!-- Tier 2 into the volume controls -->
+<path class="edge-accent" d="M400 290 H600 V150 H638" marker-end={aa}></path>
+
+<!-- Fallback -->
+<path class="edge-bad" d="M285 320 V376 H428" marker-end={ab}></path>
+<rect class="box-bad" x="430" y="350" width="160" height="52" rx="8"></rect>
+<text class="t-bad" x="510" y="372" text-anchor="middle">{l.fallback}</text>
+<text class="m-bad" x="510" y="390" text-anchor="middle">{l.fallback_note}</text>
+<path class="edge-bad" d="M590 376 H620 V172 H638" marker-end={ab}></path>
+
+<!-- Volume controls -->
+<rect class="box" x="640" y="20" width="230" height="180" rx="8"></rect>
+<text class="t" x="656" y="46">{l.controls}</text>
+{
+  l.controls_list.map((c: string, i: number) => (
+    <>
+      <text class="m-accent" x="656" y={78 + i * 28}>{i + 1}</text>
+      <text class="m" x="674" y={78 + i * 28}>{c}</text>
+    </>
+  ))
+}
+
+<!-- Out -->
+<path class="edge" d="M785 200 V358" marker-end={a}></path>
+<rect class="box-2" x="700" y="360" width="170" height="48" rx="8"></rect>
+<text class="t-sm" x="785" y="389" text-anchor="middle">{l.out}</text>

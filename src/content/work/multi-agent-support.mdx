@@ -1,0 +1,95 @@
+---
+title: "Multi-agent customer support"
+subtitle: "Five specialized agents behind one orchestrator, for e-commerce support"
+description: "I built the specialized agents of a multi-agent customer support system in a team of 4: LangGraph orchestration, ports and adapters, and RAG agents that look before they act."
+order: 3
+color: "mint"
+facts:
+  - { label: "Role", value: "The specialized agents (my part)" }
+  - { label: "Dates", value: "2025 to 2026 academic year" }
+  - { label: "Team", value: "Team of 4: Kousay Jebir, Chedli Masmoudi, Ahmed Gargouri, Yasmine Zerai. Supervised by Hajer Taktak." }
+  - { label: "Stack", value: "LangGraph, FastAPI, Pinecone, PostgreSQL, MongoDB, Replicate" }
+  - { label: "Status", value: "Academic project (INSAT), no longer running" }
+next: "beekeeper"
+---
+
+I built the **five specialized agents** (Order, Complaint, FAQ, Sales, Escalation) of a multi-agent customer support system, our INSAT end-of-year project in a **team of 4**. In the architecture, an agent has to **look before it acts**. My ordered double search stopped the Complaint agent from approving refunds on orders **delivered 46 days earlier**, and all **14 agent test scenarios** pass.
+
+<LinkRow links={[
+  { label: "GitHub README", href: "https://github.com/YasmineZerai/PFA-ai-customer-service-system#readme" },
+  { label: "Read the report (PDF, French)", href: "/pfa-report.pdf" },
+]} />
+
+<Note>Academic project, no longer running, so there's no live demo. The diagrams below are redrawn from our report, and the screenshots come from the running system.</Note>
+
+## Problem
+
+In e-commerce support, human agents drown in **200+ policies**, rule-based chatbots break off-script, and a single LLM invents procedures.
+
+## What we built
+
+A **LangGraph orchestrator** routes each request to one of **5 specialized agents**. With **ports and adapters**, the agents never know where data lives, and a separate RAG service runs on **Pinecone** with semantic chunking.
+
+<Diagram id="pfa-architecture" />
+
+## My part: the agents
+
+I built the shared base loop, then the five agents on top of it. Each agent declares only its system prompt, its tools and its maximum number of tool calls.
+
+<Diagram id="pfa-agent-loop" />
+
+## The decisions that matter
+
+<Decision title="Look before you act, enforced by the architecture">
+I made the base loop refuse to run an action tool (refund, cancel, return, ticket, assign) in the same turn as a read tool. The agent has to look first, and **the architecture enforces it, not the prompt**.
+</Decision>
+
+<Decision title="Check eligibility before reading the refund procedure">
+In early tests with a single search, the Complaint agent **approved refunds on orders delivered 46 days earlier**: it read the refund procedure first. I split it into **two ordered RAG searches**: eligibility first, resolution only once eligibility is confirmed. That removed the behaviour.
+</Decision>
+
+<Diagram id="pfa-double-search" />
+
+<Decision title="No answer without a confident source">
+Below a **0.6 retrieval confidence**, the FAQ agent rewrites its query and retries. If that fails too, it creates a ticket instead of answering.
+</Decision>
+
+## Results
+
+**14 agent test scenarios across the 5 agents, all passing.** Five of them:
+
+<TestTable rows={[
+  { scenario: "Refund request on an order delivered 46 days earlier", agent: "Complaint", expected: "Refused cleanly: outside the 30-day window", passed: true },
+  { scenario: "Customer with 4 refunds in 30 days", agent: "Complaint", expected: "Escalated silently to Trust & Safety", passed: true },
+  { scenario: "Refund above the auto-approval threshold", agent: "Complaint", expected: "Escalated with a full summary and high priority", passed: true },
+  { scenario: "Request for a SKU that doesn't exist", agent: "Sales", expected: "Blocked before it's recommended", passed: true },
+  { scenario: "FAQ retrieval confidence at 0.48", agent: "FAQ", expected: "Query rewritten and retried, confidence up to 0.71", passed: true },
+]} />
+
+<Gallery items={[
+  { src: "pfa/dashboard-overview.png", alt: "Admin dashboard overview: open tickets, active sessions, average resolution time and escalation rate, a stacked bar chart of ticket volume by type over the last 7 days, and a donut chart of routing across the Order, Complaint, FAQ, Sales and Escalation agents.", caption: "The admin overview: ticket volume by type, and how the orchestrator routed requests across the five agents." },
+  { src: "pfa/active-sessions.png", alt: "Active Sessions view: live chatbot conversations, each showing the customer tier, the detected intent, the agent handling it, the customer's emotion with a score, message count and duration. One session is flagged with an anger override.", caption: "Live sessions: each conversation shows its intent, the agent handling it, and the customer's emotion. High anger triggers an override." },
+  { src: "pfa/chat-widget.png", alt: "The embeddable chat widget: a customer asks to track an order and the assistant asks for the order ID.", caption: "The chat widget asks for the order ID before it looks anything up." },
+  { src: "pfa/dashboard-rag-queries.png", alt: "Admin dashboard, RAG Queries view: each search with its agent, score, number of chunks and status. A low-scoring FAQ query is retried, and the rewritten query is found.", caption: "Every RAG query with its score. A low-confidence FAQ search gets rewritten and retried." },
+]} />
+
+<More title="More details: every agent, the data, the dashboard">
+
+### Each agent's rules
+
+- **Complaint**, the only agent allowed to refund: auto-approves under a threshold, escalates above it, refuses outside the 30-day window, applies the EU/UK final-sale exception, **escalates silently to Trust & Safety** on fraud signals, and asks the customer when an item's condition is unverified.
+- **Order:** checks ownership before any action, asks for confirmation before cancelling, hands non-cancellable orders to Complaint, and helps customers who forgot their order ID find it.
+- **FAQ:** read-only. Spots disguised actions ("can I return my order?") and hands them to Complaint.
+- **Sales:** searches and reads purchase history in parallel, checks stock on every candidate, then writes an audit ticket. **A SKU that doesn't exist is blocked before it's recommended.**
+- **Escalation:** a fixed 3-step sequence (summarize and set priority, create the ticket, assign a human), so **a human never receives an empty ticket**.
+
+### The rest of the system (team work)
+
+The orchestrator handles intent discovery, slot filling, multi-intent requests, routing and combining answers. Data sits behind the same interface as an in-memory mock or PostgreSQL + MongoDB, and LLMs are served through Replicate. We generated synthetic company documents with **deliberate, controlled conflicts** between them, to test the agents against realistic policy contradictions. The team also built an admin dashboard and an embeddable chat widget.
+
+<Gallery items={[
+  { src: "pfa/order-agent-terminal-trace.png", alt: "Terminal trace of the Order agent: the detected intent, the collected order ID, then a get_order tool call and its result.", caption: "An Order agent trace: intent, collected slots, then the read tool call." },
+  { src: "pfa/dashboard-tickets.png", alt: "Admin dashboard, Tickets view: tickets with customer, type, status, priority and assigned human.", caption: "Tickets created by the agents, with priority and the human they're assigned to." },
+]} />
+
+</More>

@@ -1,0 +1,56 @@
+---
+import { getDiagram, getUi } from '../../lib/content';
+import BeekeeperPipeline from './BeekeeperPipeline.astro';
+import BeekeeperAgent from './BeekeeperAgent.astro';
+import BeekeeperMqtt from './BeekeeperMqtt.astro';
+import PfaArchitecture from './PfaArchitecture.astro';
+import PfaAgentLoop from './PfaAgentLoop.astro';
+import PfaDoubleSearch from './PfaDoubleSearch.astro';
+import BeekeeperContributions from './BeekeeperContributions.astro';
+
+// viewBox size, and the narrowest width the diagram may shrink to before its container scrolls.
+const registry = {
+  'beekeeper-pipeline': { C: BeekeeperPipeline, w: 880, h: 420, min: 720 },
+  'beekeeper-agent': { C: BeekeeperAgent, w: 880, h: 400, min: 720 },
+  'beekeeper-contributions': { C: BeekeeperContributions, w: 880, h: 410, min: 720 },
+  'beekeeper-mqtt': { C: BeekeeperMqtt, w: 880, h: 320, min: 720 },
+  'pfa-architecture': { C: PfaArchitecture, w: 880, h: 656, min: 720 },
+  'pfa-agent-loop': { C: PfaAgentLoop, w: 880, h: 480, min: 720 },
+  'pfa-double-search': { C: PfaDoubleSearch, w: 880, h: 340, min: 720 },
+} as const;
+
+interface Props {
+  id: keyof typeof registry;
+}
+const { id } = Astro.props;
+const entry = registry[id];
+if (!entry) throw new Error(`Unknown diagram: ${id}`);
+const d = await getDiagram(id);
+const ui = await getUi();
+const uid = `dg-${id}`;
+const { C } = entry;
+---
+
+<figure class="diagram reveal my-10 lg:-mx-24">
+  <p class="eyebrow mb-3">{d.title}</p>
+  <div
+    class="card overflow-x-auto p-3 sm:p-5"
+    tabindex="0"
+    role="region"
+    aria-label={d.title}
+  >
+    <svg
+      class="dg block h-auto w-full"
+      style={`min-width:${entry.min}px`}
+      viewBox={`0 0 ${entry.w} ${entry.h}`}
+      role="img"
+      aria-labelledby={`${uid}-t ${uid}-d`}
+    >
+      <title id={`${uid}-t`}>{d.title}</title>
+      <desc id={`${uid}-d`}>{d.alt}</desc>
+      <C l={d.labels} uid={uid} />
+    </svg>
+  </div>
+  <p class="label mt-2 sm:hidden" aria-hidden="true">{ui.scroll_hint} →</p>
+  {d.caption && <figcaption class="mt-3 text-sm text-muted lg:mx-24">{d.caption}</figcaption>}
+</figure>

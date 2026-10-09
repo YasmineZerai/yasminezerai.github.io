@@ -1,0 +1,48 @@
+---
+import Defs from './Defs.astro';
+interface Props {
+  l: Record<string, any>;
+  uid: string;
+}
+const { l, uid } = Astro.props;
+const a = `url(#${uid}-a)`;
+const aa = `url(#${uid}-aa)`;
+---
+
+<Defs uid={uid} />
+
+<!-- Devices and broker -->
+<rect class="box-2" x="10" y="110" width="120" height="52" rx="8"></rect>
+<text class="t-sm" x="70" y="141" text-anchor="middle">{l.devices}</text>
+<path class="edge" d="M130 128 H188" marker-end={a}></path>
+<path class="edge edge-dash" d="M190 146 H132" marker-end={a}></path>
+
+<rect class="box" x="190" y="110" width="150" height="52" rx="8"></rect>
+<text class="t-sm" x="265" y="141" text-anchor="middle">{l.broker}</text>
+
+<!-- Listener -->
+<path class="edge-accent" d="M340 128 H370 V80 H398" marker-end={aa}></path>
+<rect class="box-accent" x="400" y="20" width="230" height="122" rx="8"></rect>
+<text class="t-accent" x="416" y="46">{l.listener}</text>
+<text class="m" x="416" y="68">{l.listener_note[0]}</text>
+<text class="m" x="416" y="86">{l.listener_note[1]}</text>
+<text class="m-accent" x="416" y="124">{l.filter}</text>
+
+<!-- Outputs -->
+<path class="edge" d="M630 48 H668" marker-end={a}></path>
+<rect class="box" x="670" y="20" width="200" height="56" rx="8"></rect>
+<text class="t-sm" x="686" y="43">{l.state}</text>
+<text class="m" x="686" y="63">{l.state_note}</text>
+
+<path class="edge" d="M630 120 H668" marker-end={a}></path>
+<rect class="box" x="670" y="92" width="200" height="56" rx="8"></rect>
+<text class="t-sm" x="686" y="115">{l.alerts}</text>
+<text class="m" x="686" y="135">{l.alerts_note}</text>
+
+<!-- Commands back to the devices -->
+<rect class="box" x="480" y="226" width="250" height="64" rx="8"></rect>
+<text class="t-sm" x="496" y="252">{l.api}</text>
+<text class="m" x="496" y="274">{l.commands_note}</text>
+<path class="edge-accent" d="M480 258 H265 V164" marker-end={aa}></path>
+<text class="m-accent" x="282" y="248">{l.commands}</text>
+<text class="m" x="282" y="280">{l.retained}</text>

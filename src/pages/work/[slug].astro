@@ -1,0 +1,110 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { getUi, md } from '../../lib/content';
+import Decision from '../../components/mdx/Decision.astro';
+import Contribution from '../../components/mdx/Contribution.astro';
+import Step from '../../components/mdx/Step.astro';
+import Note from '../../components/mdx/Note.astro';
+import Confidential from '../../components/mdx/Confidential.astro';
+import Todo from '../../components/mdx/Todo.astro';
+import LinkRow from '../../components/mdx/LinkRow.astro';
+import Install from '../../components/mdx/Install.astro';
+import Figure from '../../components/mdx/Figure.astro';
+import AnimatedFigure from '../../components/mdx/AnimatedFigure.astro';
+import TestTable from '../../components/mdx/TestTable.astro';
+import Gallery from '../../components/mdx/Gallery.astro';
+import Diagram from '../../components/diagrams/Diagram.astro';
+import More from '../../components/mdx/More.astro';
+import Shot from '../../components/mdx/Shot.astro';
+import Collage from '../../components/Collage.astro';
+import Logo from '../../components/Logo.astro';
+import { Image } from 'astro:assets';
+import { image } from '../../lib/images';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('work');
+  return entries.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const ui = await getUi();
+const next = await getEntry('work', entry.data.next);
+const components = {
+  Decision,
+  Contribution,
+  Step,
+  Note,
+  Confidential,
+  Todo,
+  LinkRow,
+  Install,
+  Figure,
+  AnimatedFigure,
+  TestTable,
+  Gallery,
+  Diagram,
+  More,
+  Shot,
+  Collage,
+};
+---
+
+<Base title={`${entry.data.title} · Yasmine Zerai`} description={entry.data.description} ogType="article">
+  <article class={`c-${entry.data.color}`}>
+    <header class="relative isolate overflow-hidden bg-c-soft">
+      <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+        <div class="blob absolute -top-24 -right-10 size-80 rounded-full bg-c opacity-70 blur-3xl"></div>
+        <div class="blob absolute -bottom-32 left-[10%] size-72 rounded-full bg-[var(--lilac)] opacity-40 blur-3xl"></div>
+      </div>
+      <div class="container-text pt-10 pb-12 sm:pt-16 sm:pb-16">
+        <a href="/#work" class="inline-flex min-h-11 items-center gap-1.5 rounded-full font-mono text-sm font-semibold text-c-strong hover:underline">← {ui.back_home}</a>
+        <h1 class="mt-4 flex items-center gap-4 font-display text-5xl leading-[1] font-extrabold tracking-[-0.04em] sm:text-6xl">
+          {
+            entry.data.logo && (
+              <Logo
+                src={entry.data.logo}
+                px={80}
+                class="h-auto w-16 shrink-0 drop-shadow-[0_8px_18px_rgb(30_27_46/0.25)] sm:w-20 dark:drop-shadow-[0_0_14px_rgb(255_255_255/0.18)]"
+              />
+            )
+          }
+          {entry.data.title}
+        </h1>
+        <p class="mt-4 text-lg sm:text-xl">{entry.data.subtitle}</p>
+        <dl class="card mt-8 divide-y divide-line overflow-hidden text-[0.9375rem]" aria-label={ui.facts_label}>
+          {
+            entry.data.facts.map((f) => (
+              <div class="px-5 py-3 sm:grid sm:grid-cols-[6rem_1fr] sm:gap-4">
+                <dt class="font-mono text-xs font-semibold text-c-strong sm:pt-0.5">{f.label}</dt>
+                <dd class="mt-1 sm:mt-0" set:html={md(f.value)} />
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+    </header>
+
+    <div class="prose container-text mt-12">
+      <Content components={components} />
+    </div>
+
+    {
+      next && (
+        <nav class="container-text mt-20" aria-label={ui.next_case}>
+          <a
+            href={`/work/${next.id}`}
+            class={`tilt card group block p-6 sm:p-8 c-${next.data.color} bg-c-soft border-transparent`}
+          >
+            <p class="eyebrow">{ui.next_case}</p>
+            <p class="mt-3 font-display text-3xl font-bold tracking-tight">
+              {next.data.title} <span aria-hidden="true" class="inline-block transition-transform group-hover:translate-x-1.5">→</span>
+            </p>
+            <p class="mt-1 text-muted">{next.data.subtitle}</p>
+          </a>
+        </nav>
+      )
+    }
+  </article>
+</Base>

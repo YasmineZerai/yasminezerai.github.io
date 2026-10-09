@@ -1,0 +1,105 @@
+---
+import Defs from './Defs.astro';
+interface Props {
+  l: Record<string, any>;
+  uid: string;
+}
+const { l, uid } = Astro.props;
+const a = `url(#${uid}-a)`;
+const aa = `url(#${uid}-aa)`;
+const colW = 156;
+const gap = 13;
+const x0 = 24;
+const cx = (i: number) => x0 + i * (colW + gap) + colW / 2;
+const nodes: string[] = l.nodes;
+const nodeBoxes = [
+  { x: 225, w: 160 },
+  { x: 410, w: 100 },
+  { x: 535, w: 120 },
+];
+const storeW = 260;
+const storeGap = 26;
+---
+
+<Defs uid={uid} />
+
+<!-- Customer, API -->
+<rect class="box-2" x="370" y="10" width="140" height="40" rx="8"></rect>
+<text class="t-sm" x="440" y="35" text-anchor="middle">{l.user}</text>
+<path class="edge" d="M440 50 V78" marker-end={a}></path>
+<rect class="box" x="370" y="80" width="140" height="40" rx="8"></rect>
+<text class="t-sm" x="440" y="105" text-anchor="middle">{l.api}</text>
+<path class="edge" d="M440 120 V148" marker-end={a}></path>
+
+<!-- Orchestrator -->
+<rect class="box" x="200" y="150" width="480" height="110" rx="8"></rect>
+<text class="t" x="440" y="174" text-anchor="middle">{l.orchestrator}</text>
+{
+  nodes.map((n, i) => (
+    <>
+      <rect class="box-2" x={nodeBoxes[i].x} y="186" width={nodeBoxes[i].w} height="30" rx="6" />
+      <text class="m" x={nodeBoxes[i].x + nodeBoxes[i].w / 2} y="205" text-anchor="middle">
+        {n}
+      </text>
+    </>
+  ))
+}
+<path class="edge" d="M385 201 H408" marker-end={a}></path>
+<path class="edge" d="M510 201 H533" marker-end={a}></path>
+<text class="m" x="440" y="244" text-anchor="middle">{l.orchestrator_note}</text>
+
+<!-- Agents (my part) -->
+<path class="edge-accent" d="M440 260 V280"></path>
+{l.agents.map((_: unknown, i: number) => <path class="edge-accent" d={`M440 280 H${cx(i)} V316`} marker-end={aa} />)}
+<rect class="group" x="10" y="296" width="860" height="92" rx="10" style="stroke: var(--d-accent)"></rect>
+<rect x="282" y="288" width="148" height="16" style="fill: var(--d-fill)"></rect>
+<text class="m-accent" x="356" y="300" text-anchor="middle">{l.agents_group}</text>
+{
+  l.agents.map((ag: { name: string; note: string }, i: number) => (
+    <>
+      <rect class="box-accent" x={x0 + i * (colW + gap)} y="318" width={colW} height="56" rx="8" />
+      <text class="t-accent" x={cx(i)} y="342" text-anchor="middle">
+        {ag.name}
+      </text>
+      <text class="m" x={cx(i)} y="362" text-anchor="middle">
+        {ag.note}
+      </text>
+    </>
+  ))
+}
+
+<!-- Ports -->
+<text class="m" x="24" y="426">{l.ports_group}</text>
+{
+  l.ports.map((p: string, i: number) => (
+    <>
+      <path class="edge" d={`M${cx(i)} 374 V432`} marker-end={a} />
+      <rect class="box" x={x0 + i * (colW + gap)} y="434" width={colW} height="36" rx="8" />
+      <text class="m" x={cx(i)} y="457" text-anchor="middle" style="fill: var(--d-text)">
+        {p}
+      </text>
+      <path class="edge" d={`M${cx(i)} 470 V508`} marker-end={a} />
+    </>
+  ))
+}
+
+<!-- Adapters -->
+<rect class="box-2" x="24" y="510" width="832" height="44" rx="8"></rect>
+<text class="t-sm" x="40" y="537">{l.adapters}</text>
+<text class="m" x="840" y="537" text-anchor="end">{l.adapters_note}</text>
+
+<!-- Stores -->
+{
+  l.stores.map((st: string, i: number) => {
+    const x = 24 + i * (storeW + storeGap);
+    return (
+      <>
+        <path class="edge" d={`M${x + storeW / 2} 554 V592`} marker-end={a} />
+        <rect class="box" x={x} y="594" width={storeW} height="44" rx="8" />
+        <text class="t-sm" x={x + storeW / 2} y="621" text-anchor="middle">
+          {st}
+        </text>
+      </>
+    );
+  })
+}

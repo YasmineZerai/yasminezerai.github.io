@@ -1,0 +1,32 @@
+---
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+---
+
+<details class="more group my-10 rounded-3xl border border-line bg-surface shadow-[var(--shadow)]">
+  <summary class="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 rounded-3xl px-5 py-4 font-display text-lg font-bold sm:px-6 [&::-webkit-details-marker]:hidden">
+    {title}
+    <span class="grid size-9 shrink-0 place-items-center rounded-full bg-c-soft text-c-strong transition-transform duration-300 group-open:rotate-45" aria-hidden="true">
+      <svg class="size-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 3v10M3 8h10"></path></svg>
+    </span>
+  </summary>
+  <div class="more-body border-t border-line px-5 pt-2 pb-6 sm:px-6">
+    <slot />
+  </div>
+</details>
+
+<style>
+  .more-body > :global(* + *) { margin-top: 1.25rem; }
+  .more-body > :global(h3) { margin-top: 2.25rem; font-size: 1.1875rem; font-weight: 650; letter-spacing: -0.015em; }
+  .more-body > :global(h3:first-child) { margin-top: 1rem; }
+  .more-body :global(ul) { padding-left: 1.4rem; list-style: none; }
+  .more-body :global(ul > li) { position: relative; }
+  .more-body :global(ul > li + li) { margin-top: 0.5rem; }
+  .more-body :global(ul > li::before) {
+    content: ""; position: absolute; left: -1.2rem; top: 0.6em;
+    width: 0.5rem; height: 0.5rem; border-radius: 99px; background: var(--c, var(--lilac));
+  }
+  .more-body :global(strong) { font-weight: 650; }
+</style>

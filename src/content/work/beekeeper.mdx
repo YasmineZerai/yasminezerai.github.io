@@ -1,0 +1,90 @@
+---
+title: "Beekeeper Tech"
+subtitle: "A production AI platform for an IoT startup for bee colony monitoring"
+description: "I built and owned a production platform covering 2,000+ IoT devices: the MQTT link to the hives, the AI agent that replaced manual sensor review, and the colony health score."
+order: 1
+color: "peach"
+logo: "beekeeper/logo-v2.png"
+facts:
+  - { label: "Role", value: "AI & Data Science Engineer" }
+  - { label: "Dates", value: "Aug 2025 to present" }
+  - { label: "Team", value: "Small team (under 10)" }
+  - { label: "Stack", value: "async FastAPI, MongoDB, MQTT, React (Vite), LangChain, Docker, AWS, GitHub Actions" }
+  - { label: "Status", value: "In production" }
+next: "loopview"
+---
+
+I prototyped the platform of an IoT startup for bee colony monitoring in Streamlit, then **rebuilt it and owned it end to end**, from architecture to deployment. It covers **2,000+ IoT devices**. I built the MQTT link that listens to the hives, the **AI agent** that **replaced the manual review of sensor data completely**, and the colony health score that agent reads.
+
+<Collage size="page" images={[
+  { src: "beekeeper/office.jpg", alt: "My desk at Beekeeper Tech: a laptop showing sensor charts, with the company logo on the wall behind.", position: "0% 50%" },
+  { src: "beekeeper/office-selfie.jpg", alt: "Me at the Beekeeper Tech office, pointing at the company logo on the wall.", position: "70% 30%" },
+  { src: "beekeeper/platform-sunset-v2.jpg", alt: "The platform's sign-in screen on my laptop, with the office terrace at sunset behind it.", position: "50% 72%" },
+]} />
+
+<Shot src="beekeeper/dashboard-overview-v2.png" alt="Apiary overview in the dashboard: total hives, share of healthy hives, average score and critical count, a map of hive locations and the health distribution. Names and map labels are blurred." caption="An apiary at a glance: how many hives, how healthy, and where they are. Names and places blurred." />
+
+## Problem
+
+The team reviewed sensor data from every hive by hand to find colonies in trouble. A low health score didn't always mean a sick colony, and a false alarm costs a beekeeper a real drive.
+
+## What I built
+
+An **async FastAPI** backend on **MongoDB** (**106 REST endpoints**, **94 automated tests**), a **React** dashboard in English and Arabic, and three parts that carry it:
+
+- **The MQTT service** that listens to every device, updates its live state and fires immediate alerts, and sends commands back to the hives.
+- **An autonomous ReAct agent** that investigates anomalies every night with 7 tools. It **replaced the manual review of sensor data completely**.
+- **The colony health score**, 0 to 10, computed every night for **early detection of colony collapse**.
+
+## The decisions that matter
+
+<Decision title="Rules first, so cost follows anomalies, not fleet size">
+A deterministic rule engine checks every device for free, with bilingual template alerts. Only brood anomalies escalate to the agent, and a healthy fleet makes **no LLM call at all**.
+</Decision>
+
+<Decision title="The agent can fail. The alert can't.">
+The answer must parse against a schema; when it doesn't, the error goes back to the model and it **corrects itself**. If it still fails, the template alert goes out instead. Every tool call is stored, so **any alert can be traced back to its evidence**.
+</Decision>
+
+<Decision title="One MQTT listener, outside the API">
+The listener runs as its own service, so there's **exactly one subscriber** however many API replicas run, and each alert is handled once. Its callback never does I/O, so a slow email can't block the connection to the devices.
+</Decision>
+
+### My contribution to the health score: Brood Presence Confidence
+
+I found the problem in the data, not in the formula. Exploring the fleet's **historical sensor recordings**, I saw **a large number of hives scoring near zero without being unhealthy**: they had no brood, or the probe had moved, and the score read "no brood signal" as "sick colony".
+
+So I treated it as a data science problem. I did the **EDA** and **feature engineering** on the sensor time series, ran **correlation analysis** between brood, hive and outside temperatures, and used a **gradient-boosted regression** to measure how much outside weather explains what the hive sensors read. That gave three behaviours bees show when they raise brood, which became a confidence **c ∈ [0, 1]** that the probe is really reading brood, **calibrated against the fleet's history**. When c is low, brood penalties drop, so **a displaced probe or a natural brood break produces uncertainty instead of a false critical alert**. It's **now in production**.
+
+<Diagram id="beekeeper-contributions" />
+
+## Results
+
+- **2,000+ IoT devices**, in production for **government and international organisation clients**, shown in **two product demos**.
+- The agent is the team's **only source of truth** for colony health.
+- **Brood Presence Confidence**, built and calibrated on the fleet's data, is **in production**.
+
+<More title="More details: the MQTT service and the platform">
+
+### The MQTT service
+
+<Diagram id="beekeeper-mqtt" />
+
+- **Old data never overwrites new.** Retained messages are skipped on reconnect so old alerts don't re-fire, a timestamp guard keeps the freshest reading, and a persistent session lets the broker queue messages while the listener restarts.
+- **Commands wait for a sleeping hive.** Commands go out with at-least-once delivery and the retain flag, so a device that wakes up still gets the last one.
+- MQTT is the fast path. A nightly job owns the history: it ingests device logs, preprocesses them, scores every hive and writes the reports.
+
+### The platform
+
+- **Fleet overview:** health distribution, a map of every hive, the 5 best and 5 worst colonies.
+- **Hive detail:** time-series charts, the score gauge with its sub-scores, anomaly flags, an AI-written summary with prioritised actions, PDF export.
+- **Three roles** (beekeeper, organisation, administrator), with scope enforced by the backend.
+- **Notifications** in-app, on WhatsApp and by email.
+- **Field work:** QR codes on hives to log inspections, 8 inspection types, bulk operations.
+- **Fully bilingual English and Arabic, right-to-left included**, down to alerts, AI analysis and PDF reports from a **RAG** pipeline (LangChain, embeddings, semantic chunking).
+
+### Now
+
+I'm building a **second client platform**: drone imagery processed into georeferenced parcels (PostGIS, GeoJSON), a booking engine, and an AI scoring model driven by environmental data.
+
+</More>

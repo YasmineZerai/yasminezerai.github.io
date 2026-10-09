@@ -1,0 +1,72 @@
+---
+// A playful three-photo collage: one main picture, two smaller ones, an optional logo badge.
+// layout "side": main on the left, two small on the right (portrait-friendly photos).
+// layout "stack": main full width on top at its own shape, two small below (wide screenshots).
+import { Image } from 'astro:assets';
+import { image } from '../lib/images';
+
+type Img = { src: string; alt: string; position?: string; fit?: 'cover' | 'contain'; bg?: string };
+interface Props {
+  images: Img[];
+  logo?: string;
+  logoAlt?: string;
+  size?: 'card' | 'page';
+  layout?: 'side' | 'stack';
+}
+const { images, logo, logoAlt = '', size = 'card', layout = 'side' } = Astro.props;
+const [main, a, b] = images;
+const tall = size === 'page';
+const stack = layout === 'stack';
+const tile = 'overflow-hidden rounded-2xl shadow-lg ring-4 ring-surface transition-transform duration-500';
+const pos = (img: Img) => (img.position ? `object-position:${img.position}` : undefined);
+---
+
+<div
+  class:list={[
+    'collage relative grid w-full gap-3',
+    stack ? 'grid-cols-2' : ['grid-cols-6 grid-rows-2', tall ? 'h-80 sm:h-[26rem]' : 'h-72 sm:h-80'],
+  ]}
+>
+  <div
+    class:list={[tile, stack ? 'col-span-2' : 'col-span-4 row-span-2', 'group-hover:-rotate-1']}
+    style={main.bg ? `background:${main.bg}` : undefined}
+  >
+    <Image
+      src={image(main.src)}
+      alt={main.alt}
+      widths={[480, 800, 1100]}
+      sizes={stack ? '(min-width: 768px) 32rem, 100vw' : tall ? '(min-width: 768px) 32rem, 66vw' : '(min-width: 768px) 24rem, 66vw'}
+      loading="lazy"
+      class:list={[stack ? 'h-auto w-full' : 'size-full', main.fit === 'contain' ? 'object-contain p-2' : 'object-cover']}
+      style={pos(main)}
+    />
+  </div>
+  {
+    [a, b].filter(Boolean).map((img, i) => (
+      <div
+        class:list={[
+          tile,
+          stack ? 'h-32 sm:h-40' : 'col-span-2',
+          i === 0 ? 'rotate-2 group-hover:rotate-0' : '-rotate-2 group-hover:rotate-0',
+        ]}
+      >
+        <Image
+          src={image(img.src)}
+          alt={img.alt}
+          widths={[240, 480]}
+          sizes={tall || stack ? '16rem' : '12rem'}
+          loading="lazy"
+          class="size-full object-cover"
+          style={pos(img)}
+        />
+      </div>
+    ))
+  }
+  {
+    logo && (
+      <div class="absolute -top-3 -left-3 grid size-16 place-items-center rounded-2xl bg-white p-2.5 shadow-lg ring-1 ring-black/5 sm:size-20">
+        <Image src={image(logo)} alt={logoAlt} widths={[80, 160]} sizes="5rem" class="h-auto w-full" />
+      </div>
+    )
+  }
+</div>

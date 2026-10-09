@@ -1,0 +1,165 @@
+# Labels and captions for the inline SVG diagrams (English).
+# Beekeeper diagrams: abstract boxes and arrows only. No numbers, thresholds or names.
+
+beekeeper-pipeline:
+  title: "The nightly two-tier pipeline"
+  caption: "Rules check every device at no model cost. Only brood anomalies reach the agent, and its alerts pass four volume controls. If the agent fails, a template still sends the alert."
+  alt: "Flow diagram. Every device goes through a rule engine (tier 1), which sends pre-written alerts. Only brood anomalies escalate to the AI agent (tier 2). Agent output passes through four volume controls before reaching the beekeeper. If the agent fails, a template fallback sends the alert."
+  labels:
+    devices: "Every device"
+    tier1: "Tier 1 · Rule engine"
+    tier1_checks: ["inactive", "battery low", "weak signal", "sensor missing", "brood out of range"]
+    tier1_out: "Pre-written bilingual alert"
+    tier1_cost: "no model cost"
+    escalate: "brood anomalies only"
+    tier2: "Tier 2 · AI agent"
+    fallback: "Template fallback"
+    fallback_note: "if the agent fails"
+    controls: "Volume controls"
+    controls_list: ["one alert per device", "one escalation per device", "ceiling per run", "no repeat across runs"]
+    out: "Beekeeper"
+
+beekeeper-agent:
+  title: "How the agent investigates a hive"
+  caption: "The agent reads the hive's data through its tools, then compares it with nearby hives: the same pattern nearby points to the environment, only this hive points to the colony."
+  alt: "Diagram. The AI agent sits at the centre with seven tools around it: latest score, anomaly flags, score trend, recent sensor data, device hardware health, weather, nearby devices. The nearby devices tool leads to a neighbour check with two outcomes: the same pattern on neighbours means an environmental cause, only this hive means a colony cause. The answer goes through schema validation, and errors loop back to the agent."
+  labels:
+    anomaly: "Brood anomaly"
+    agent: "ReAct agent"
+    tools_title: "Tools"
+    tools: ["latest score", "anomaly flags", "score trend", "recent sensor data", "hardware health", "weather", "nearby devices"]
+    neighbour: "Neighbour check"
+    same: "Same pattern nearby"
+    same_out: "Environment"
+    only: "Only this hive"
+    only_out: "The colony"
+    schema: "Schema validation"
+    retry: ["error sent back,", "agent corrects"]
+    trace: "every tool call stored"
+    out: "Alert with its evidence"
+
+beekeeper-mqtt:
+  title: "The MQTT service"
+  caption: "One listener, separate from the API, takes every device message off the broker without blocking. Commands go the other way and wait for a sleeping device."
+  alt: "Diagram. Devices exchange messages with an MQTT broker. A single listener service, separate from the API, receives them: retained and invalid messages are dropped, telemetry updates the device's live state in MongoDB, and alerts go out by WhatsApp and email. The API publishes commands (hibernate, wake, planned move) to the broker, retained so a sleeping device receives them when it wakes."
+  labels:
+    devices: "Devices"
+    broker: "MQTT broker"
+    listener: "Listener service"
+    listener_note: ["one subscriber,", "separate from the API"]
+    filter: "skip retained · validate"
+    state: "Live device state"
+    state_note: "newer data wins"
+    alerts: "Immediate alerts"
+    alerts_note: "WhatsApp · email"
+    api: "API"
+    commands: "Commands"
+    commands_note: "hibernate · wake · planned move"
+    retained: "retained, delivered on wake"
+
+pfa-architecture:
+  title: "Architecture"
+  caption: "The orchestrator routes each request to a specialized agent. Agents call tools through ports, and adapters decide where the data lives."
+  alt: "Layered diagram. The customer reaches a FastAPI backend, then the LangGraph orchestrator (intent discovery, routing, combine; slot filling and multi-intent). It routes to five specialized agents: Order, Complaint, FAQ, Sales, Escalation. The agents call tools through ports. Adapters connect the ports to PostgreSQL, MongoDB and the Pinecone RAG service, or to an in-memory mock."
+  labels:
+    user: "Customer"
+    api: "FastAPI"
+    orchestrator: "Orchestrator · LangGraph"
+    nodes: ["intent discovery", "routing", "combine"]
+    orchestrator_note: "slot filling · multi-intent"
+    agents_group: "My part: the agents"
+    agents:
+      - { name: "Order", note: "track · cancel" }
+      - { name: "Complaint", note: "refunds · returns" }
+      - { name: "FAQ", note: "policies · RAG" }
+      - { name: "Sales", note: "recommendations" }
+      - { name: "Escalation", note: "human handoff" }
+    ports_group: "Ports"
+    ports: ["OrderPort", "CustomerPort", "RAGPort", "ProductPort", "TicketPort"]
+    adapters: "Adapters"
+    adapters_note: "in-memory mock · PostgreSQL · MongoDB"
+    stores: ["PostgreSQL", "MongoDB", "Pinecone (RAG service)"]
+
+pfa-agent-loop:
+  title: "The shared agent loop"
+  caption: "Every agent runs the same loop. A turn either reads or acts, never both."
+  alt: "Loop diagram. The agent context goes to an LLM call with the agent's system prompt and tools. If the model requests tool calls, they run and their results return to the context, up to the maximum number of tool calls. A rule splits tools into read tools and action tools: they never run in the same turn. With no tool calls, the agent builds its result."
+  labels:
+    context: "Context"
+    context_note: "messages + customer profile"
+    llm: "LLM call"
+    llm_note: "system prompt + tools"
+    decide: "tool calls?"
+    yes: "yes"
+    no: "no"
+    execute: "Run tools"
+    execute_note: "results back to the context"
+    result: "Build result"
+    limit: "up to max tool calls"
+    rule: "Read/action rule"
+    read: "Read tools"
+    read_examples: "get order · search policy · check stock"
+    action: "Action tools"
+    action_examples: "refund · cancel · return · ticket · assign"
+    rule_note: "never in the same turn"
+    declares: "Each agent declares only"
+    declares_items: ["system prompt", "tools", "max tool calls"]
+
+pfa-double-search:
+  title: "The Complaint agent's ordered double search"
+  caption: "Eligibility first. The refund procedure is read only once the order is eligible."
+  alt: "Two-step diagram. Search 1, eligibility: 30-day window, item condition, product category. If not eligible, the agent stops and refuses. If eligible, search 2, resolution: the refund procedure. A crossed-out path shows the old single search, which read the procedure first and approved a refund on an order delivered 46 days earlier."
+  labels:
+    request: "Refund request"
+    s1: "1 · Eligibility search"
+    s1_items: ["30-day window", "item condition", "product category"]
+    no: "not eligible"
+    stop: "Stop · refuse"
+    yes: "eligible"
+    s2: "2 · Resolution search"
+    s2_items: ["refund procedure"]
+    out: "Decision matrix"
+    before: "Before: one search"
+    before_note: "procedure read first, refund approved on a 46-day-old order"
+
+beekeeper-pipeline-thumb:
+  title: "Two-tier pipeline"
+  caption: ""
+  alt: ""
+  labels:
+    devices: "2,000+ devices"
+    rules: "Rule engine"
+    agent: "AI agent"
+    controls: "Volume controls"
+    out: "Alert"
+    note: "brood anomalies only"
+
+pfa-architecture-thumb:
+  title: "Orchestrator and agents"
+  caption: ""
+  alt: ""
+  labels:
+    orchestrator: "LangGraph orchestrator"
+    agents: ["Order", "Complaint", "FAQ", "Sales", "Escalation"]
+    ports: "Ports and adapters"
+
+beekeeper-contributions:
+  title: "Brood Presence Confidence, built from the fleet's data"
+  caption: "An illustration of the method, not real values: what was compared, not how it is computed."
+  alt: "Pipeline diagram. Step 1, data: historical recordings from 2,000+ devices go through exploratory analysis (many hives scoring near zero without being sick), correlation analysis between brood, hive and outside temperatures, and a gradient-boosted regression of hive readings on outside weather. Step 2, features: three brood behaviours, a narrow temperature band, being warmer than the hive, and being shielded from outside swings. Step 3: they combine into a confidence c between 0 and 1; when c drops, brood penalties drop, giving uncertainty instead of a false alarm. Step 4: checked against the fleet, where a decline on many devices at once from mid-October matched the end of the brood season, not sensor faults."
+  labels:
+    h1: "1 · Data"
+    h2: "2 · Features"
+    h3: "3 · Confidence"
+    d1: "Historical fleet recordings"
+    d1_note: "2,000+ devices · sensor time series"
+    d2: "EDA"
+    d2_note: "many hives near 0, not actually sick"
+    d3: "Correlation analysis (Pearson, Spearman)"
+    d4: "Gradient-boosted regression"
+    b1: "Narrow temperature band"
+    b2: "Warmer than the hive"
+    b3: "Shielded from outside swings"
+    result: "uncertainty, no false alarm"
+    check: "Checked against the fleet"
+    check_note: ["A decline on many devices at once from mid-October:", "the end of the brood season, not sensor faults."]

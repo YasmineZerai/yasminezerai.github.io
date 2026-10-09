@@ -1,0 +1,102 @@
+---
+// Brood Presence Confidence as a data science pipeline: symbols only, no formula, no real values.
+import Defs from './Defs.astro';
+interface Props {
+  l: Record<string, any>;
+  uid: string;
+}
+const { l, uid } = Astro.props;
+const a = `url(#${uid}-a)`;
+const aa = `url(#${uid}-aa)`;
+
+// Math with subscripts: even parts are normal text, odd parts are subscripts.
+type Mathy = string[];
+const data: { y: number; title: string; note?: string; math?: Mathy }[] = [
+  { y: 40, title: l.d1, note: l.d1_note },
+  { y: 112, title: l.d2, note: l.d2_note },
+  { y: 184, title: l.d3, math: ['ρ(T', 'brood', ',  T', 'hive', '),   ρ(T', 'brood', ',  T', 'out', ')'] },
+  { y: 256, title: l.d4, math: ['T', 'hive', ' ≈ f(weather)'] },
+];
+const features: { y: number; title: string; math: Mathy }[] = [
+  { y: 58, title: l.b1, math: ['σ(T', 'brood', ') small'] },
+  { y: 140, title: l.b2, math: ['T', 'brood', ' > T', 'hive'] },
+  { y: 222, title: l.b3, math: ['ρ(T', 'brood', ',  T', 'out', ') low'] },
+];
+const gx = 722;
+const gy = 160;
+---
+
+<Defs uid={uid} />
+
+<!-- step headers -->
+<text class="m-accent" x="10" y="24">{l.h1}</text>
+<text class="m-accent" x="352" y="24">{l.h2}</text>
+<text class="m-accent" x={gx - 92} y="24">{l.h3}</text>
+
+<!-- 1. Data -->
+{
+  data.map((d, i) => (
+    <>
+      <rect class:list={[i === 0 ? 'box-2' : 'box']} x="10" y={d.y} width="300" height="58" rx="8" />
+      <text class="t-sm" x="24" y={d.y + 23}>
+        {d.title}
+      </text>
+      {d.note && (
+        <text class="m" x="24" y={d.y + 44}>
+          {d.note}
+        </text>
+      )}
+      {d.math && (
+        <text class="math-sm" x="24" y={d.y + 45}>
+          {d.math.map((part, j) => (j % 2 === 1 ? <tspan class="sub" dy="4">{part}</tspan> : <tspan dy={j === 0 ? 0 : -4}>{part}</tspan>))}
+        </text>
+      )}
+      {i < data.length - 1 && <path class="edge" d={`M160 ${d.y + 58} V${d.y + 70}`} marker-end={a} />}
+    </>
+  ))
+}
+
+<!-- data feeds the features -->
+<path class="edge-accent" d="M310 185 H326"></path>
+<path class="edge-accent" d="M326 87 V251"></path>
+{features.map((f) => <path class="edge-accent" d={`M326 ${f.y + 29} H350`} marker-end={aa} />)}
+
+<!-- 2. Features: the three brood behaviours -->
+{
+  features.map((f) => (
+    <>
+      <rect class="box-accent" x="352" y={f.y} width="226" height="58" rx="8" />
+      <text class="t-sm" x="366" y={f.y + 23}>
+        {f.title}
+      </text>
+      <text class="math-sm" x="366" y={f.y + 45}>
+        {f.math.map((part, j) => (j % 2 === 1 ? <tspan class="sub" dy="4">{part}</tspan> : <tspan dy={j === 0 ? 0 : -4}>{part}</tspan>))}
+      </text>
+      <path class="edge-accent" d={`M578 ${f.y + 29} C 620 ${f.y + 29}, 630 ${gy}, ${gx - 64} ${gy}`} marker-end={aa} />
+    </>
+  ))
+}
+
+<!-- 3. The confidence -->
+<circle cx={gx} cy={gy} r="54" style="fill: var(--d-fill); stroke: var(--d-stroke); stroke-width: 10"></circle>
+<circle
+  cx={gx}
+  cy={gy}
+  r="54"
+  transform={`rotate(-90 ${gx} ${gy})`}
+  style="fill: none; stroke: var(--d-accent); stroke-width: 10; stroke-linecap: round; stroke-dasharray: 240 400"
+></circle>
+<text class="math" x={gx} y={gy + 4} text-anchor="middle" style="font-size: 30px; fill: var(--d-accent)">c</text>
+<text class="math-sm" x={gx} y={gy + 28} text-anchor="middle">∈ [0, 1]</text>
+
+<path class="edge" d={`M${gx} ${gy + 64} V${gy + 92}`} marker-end={a}></path>
+<rect class="box-accent" x={gx - 110} y={gy + 94} width="220" height="58" rx="8"></rect>
+<text class="math-sm" x={gx} y={gy + 118} text-anchor="middle">c ↓ ⇒ brood penalty ↓</text>
+<text class="m" x={gx} y={gy + 140} text-anchor="middle">{l.result}</text>
+
+<!-- 4. Checked against the fleet -->
+<rect class="box-2" x="352" y="334" width="518" height="68" rx="8"></rect>
+<text class="t-sm" x="366" y="358">{l.check}</text>
+<text class="m" x="366" y="380">{l.check_note[0]}</text>
+<text class="m" x="366" y="396">{l.check_note[1]}</text>
+<path class="edge edge-dash" d="M160 314 V368 H350" marker-end={a}></path>

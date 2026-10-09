@@ -1,0 +1,41 @@
+---
+import { getUi } from '../../lib/content';
+interface Props {
+  command: string;
+}
+const { command } = Astro.props;
+const ui = await getUi();
+---
+
+<div class="install my-6">
+  <p class="label mb-2">{ui.install_label}</p>
+  <div class="flex items-stretch overflow-hidden rounded-2xl border-2 border-c bg-surface shadow-[var(--shadow)]">
+    <pre class="min-w-0 flex-1 overflow-x-auto px-4 py-3 font-mono text-[0.9375rem]"><span class="select-none text-muted" aria-hidden="true">$ </span><code>{command}</code></pre>
+    <button
+      type="button"
+      class="copy-btn min-w-24 shrink-0 bg-c-soft px-4 font-mono text-sm font-semibold text-c-strong transition-colors hover:bg-c"
+      data-command={command}
+      data-copied={ui.copied}
+      data-label={ui.copy}
+    >
+      {ui.copy}
+    </button>
+  </div>
+  <p class="sr-only" aria-live="polite" data-copy-status></p>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('.copy-btn').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const status = btn.closest('.install')?.querySelector('[data-copy-status]');
+      try {
+        await navigator.clipboard.writeText(btn.dataset.command ?? '');
+        btn.textContent = btn.dataset.copied ?? 'Copied';
+        if (status) status.textContent = btn.dataset.copied ?? '';
+        setTimeout(() => (btn.textContent = btn.dataset.label ?? 'Copy'), 1600);
+      } catch {
+        // Clipboard blocked: the command stays selectable.
+      }
+    });
+  });
+</script>

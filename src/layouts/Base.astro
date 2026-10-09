@@ -1,0 +1,181 @@
+---
+import '../styles/global.css';
+import ThemeToggle from '../components/ThemeToggle.astro';
+import { getUi } from '../lib/content';
+
+interface Props {
+  title: string;
+  description: string;
+  ogType?: 'website' | 'article';
+}
+
+const { title, description, ogType = 'website' } = Astro.props;
+const ui = await getUi();
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL('/og.png', Astro.site);
+const nav = [
+  { href: '/#work', label: ui.nav_work, mobile: true },
+  { href: '/#experience', label: ui.nav_experience, mobile: false },
+  { href: '/#skills', label: ui.nav_skills, mobile: false },
+  { href: '/#contact', label: ui.nav_contact, mobile: true },
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="theme-color" content="#fafaf8" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f1115" media="(prefers-color-scheme: dark)" />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <!-- Visit counter (GoatCounter: cookieless, no personal data). Links like /?ref=company show up as the referrer. -->
+    <script is:inline data-goatcounter="https://yasminezerai.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+    <script is:inline>
+      (function () {
+        var d = document.documentElement;
+        d.classList.add('js');
+        var t = null;
+        try { t = localStorage.getItem('theme'); } catch (e) {}
+        if (t !== 'light' && t !== 'dark') {
+          t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        d.setAttribute('data-theme', t);
+      })();
+    </script>
+  </head>
+  <body class="min-h-dvh flex flex-col">
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-surface focus:px-3 focus:py-2 focus:border focus:border-line"
+      >{ui.skip}</a
+    >
+    <header class="sticky top-0 z-40 border-b border-line/70 bg-bg/75 backdrop-blur-md">
+      <div class="container-page flex h-14 items-center justify-between gap-3">
+        <a href="/" class="group inline-flex items-center gap-2 font-display text-base font-bold tracking-tight whitespace-nowrap">
+          <span class="grid size-8 place-items-center rounded-full bg-[conic-gradient(from_200deg,#ffc4a6,#cdb9ff,#a3e8c4,#b0d7ff,#ffc4a6)] font-mono text-[0.7rem] font-bold text-[#1e1b2e] transition-transform group-hover:rotate-12" aria-hidden="true">YZ</span>
+          <span class="group-hover:text-accent">{ui.home}</span>
+        </a>
+        <nav aria-label="Main" class="flex items-center gap-1 sm:gap-2">
+          <ul class="flex items-center gap-1 sm:gap-2 text-sm">
+            {
+              nav.map((n) => (
+                <li class:list={[!n.mobile && 'hidden sm:block']}>
+                  <a href={n.href} class="inline-flex min-h-11 items-center rounded-full px-3 text-muted transition-colors hover:bg-surface-2 hover:text-ink">
+                    {n.label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+          <ThemeToggle label={ui.theme_toggle} />
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class="flex-1">
+      <slot />
+    </main>
+
+    <footer class="mt-24 border-t border-line">
+      <div class="container-page flex flex-col gap-2 py-8 text-sm text-muted sm:flex-row sm:justify-between">
+        <p>© {new Date().getFullYear()} Yasmine Zerai</p>
+        <p>{ui.footer}</p>
+      </div>
+    </footer>
+
+    <script>
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // Links that leave the portfolio (other sites, the CV PDF) open in a new tab.
+      document.querySelectorAll<HTMLAnchorElement>('a[href]').forEach((a) => {
+        const url = new URL(a.href, location.href);
+        if (url.protocol !== 'http:' && url.protocol !== 'https:') return;
+        const separateSite = url.hostname === 'yasminezerai.github.io' && url.pathname.startsWith('/loopview');
+        if (url.origin !== location.origin || separateSite || url.pathname.endsWith('.pdf')) {
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+        }
+      });
+
+      // Diagrams: a dotted copy of every accent edge, animated by CSS so data seems to flow along it.
+      if (!reduce) {
+        document.querySelectorAll<SVGPathElement>('.dg path.edge-accent').forEach((edge) => {
+          const dots = edge.cloneNode() as SVGPathElement;
+          dots.removeAttribute('marker-end');
+          dots.setAttribute('class', 'flow');
+          edge.after(dots);
+        });
+      }
+
+      // Reveal on scroll. Children of [data-stagger] come in one after another.
+      document.querySelectorAll<HTMLElement>('[data-stagger]').forEach((group) => {
+        group.querySelectorAll<HTMLElement>(':scope > .reveal').forEach((el, i) => el.style.setProperty('--delay', `${i * 90}ms`));
+      });
+      const els = document.querySelectorAll('.reveal, .diagram, [data-count]');
+      const show = (el: Element) => {
+        el.classList.add('is-visible');
+        if (el instanceof HTMLElement && el.dataset.count) countUp(el);
+      };
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const e of entries) {
+              if (e.isIntersecting) {
+                show(e.target);
+                io.unobserve(e.target);
+              }
+            }
+          },
+          { rootMargin: '0px 0px -8% 0px' },
+        );
+        els.forEach((el) => io.observe(el));
+      } else {
+        els.forEach(show);
+      }
+
+      // Numbers count up from zero.
+      function countUp(el: HTMLElement) {
+        const target = Number(el.dataset.count);
+        const fmt = (n: number) => n.toLocaleString('en-US');
+        if (reduce || !target) {
+          el.textContent = fmt(target);
+          return;
+        }
+        const start = performance.now();
+        const dur = 1400;
+        const tick = (now: number) => {
+          const p = Math.min(1, (now - start) / dur);
+          el.textContent = fmt(Math.round(target * (1 - Math.pow(1 - p, 3))));
+          if (p < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      }
+
+      // Cards lean towards the pointer.
+      if (!reduce && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+        document.querySelectorAll<HTMLElement>('.tilt').forEach((card) => {
+          card.addEventListener('pointermove', (e) => {
+            const r = card.getBoundingClientRect();
+            const x = (e.clientX - r.left) / r.width - 0.5;
+            const y = (e.clientY - r.top) / r.height - 0.5;
+            card.style.transform = `perspective(1000px) rotateX(${(-y * 4).toFixed(2)}deg) rotateY(${(x * 4).toFixed(2)}deg) translateY(-4px)`;
+          });
+          card.addEventListener('pointerleave', () => (card.style.transform = ''));
+        });
+      }
+    </script>
+  </body>
+</html>

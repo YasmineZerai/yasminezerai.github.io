@@ -1,0 +1,62 @@
+---
+// Simplified diagrams for the home page cards. Decorative: the card text says the same thing.
+import { getDiagram } from '../../lib/content';
+import Defs from './Defs.astro';
+
+interface Props {
+  id: 'beekeeper-pipeline-thumb' | 'pfa-architecture-thumb';
+  alt: string;
+}
+const { id, alt } = Astro.props;
+const l = (await getDiagram(id)).labels;
+const uid = `th-${id}`;
+const a = `url(#${uid}-a)`;
+const aa = `url(#${uid}-aa)`;
+---
+
+<svg class="dg block h-auto w-full" viewBox="0 0 480 270" role="img" aria-label={alt}>
+  <Defs uid={uid} />
+  {
+    id === 'beekeeper-pipeline-thumb' && (
+      <>
+        <rect class="box-2" x="20" y="40" width="130" height="48" rx="8" />
+        <text class="t-sm" x="85" y="69" text-anchor="middle">{l.devices}</text>
+        <path class="edge" d="M150 64 H188" marker-end={a} />
+        <rect class="box" x="190" y="40" width="130" height="48" rx="8" />
+        <text class="t-sm" x="255" y="69" text-anchor="middle">{l.rules}</text>
+        <path class="edge" d="M320 64 H348" marker-end={a} />
+        <rect class="box" x="350" y="40" width="110" height="48" rx="8" />
+        <text class="t-sm" x="405" y="69" text-anchor="middle">{l.out}</text>
+
+        <path class="edge-accent" d="M255 88 V158" marker-end={aa} />
+        <text class="m-accent" x="265" y="128">{l.note}</text>
+        <rect class="box-accent" x="190" y="160" width="130" height="56" rx="8" />
+        <text class="t-accent" x="255" y="193" text-anchor="middle">{l.agent}</text>
+        <path class="edge-accent" d="M320 188 H430 V90" marker-end={aa} />
+        <text class="m" x="335" y="208">{l.controls}</text>
+      </>
+    )
+  }
+  {
+    id === 'pfa-architecture-thumb' && (
+      <>
+        <rect class="box" x="110" y="24" width="260" height="48" rx="8" />
+        <text class="t-sm" x="240" y="53" text-anchor="middle">{l.orchestrator}</text>
+        <path class="edge-accent" d="M240 72 V96" />
+        {l.agents.map((ag: string, i: number) => {
+          const x = 14 + i * 92;
+          return (
+            <>
+              <path class="edge-accent" d={`M240 96 H${x + 42} V118`} marker-end={aa} />
+              <rect class="box-accent" x={x} y="120" width="84" height="48" rx="8" />
+              <text class="m-accent" x={x + 42} y="149" text-anchor="middle">{ag}</text>
+              <path class="edge" d={`M${x + 42} 168 V196`} marker-end={a} />
+            </>
+          );
+        })}
+        <rect class="box-2" x="14" y="198" width="452" height="44" rx="8" />
+        <text class="t-sm" x="240" y="225" text-anchor="middle">{l.ports}</text>
+      </>
+    )
+  }
+</svg>

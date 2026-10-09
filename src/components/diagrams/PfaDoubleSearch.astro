@@ -1,0 +1,45 @@
+---
+import Defs from './Defs.astro';
+interface Props {
+  l: Record<string, any>;
+  uid: string;
+}
+const { l, uid } = Astro.props;
+const a = `url(#${uid}-a)`;
+const aa = `url(#${uid}-aa)`;
+const ab = `url(#${uid}-ab)`;
+---
+
+<Defs uid={uid} />
+
+<!-- Request -->
+<rect class="box-2" x="10" y="44" width="130" height="52" rx="8"></rect>
+<text class="t-sm" x="75" y="75" text-anchor="middle">{l.request}</text>
+<path class="edge" d="M140 70 H178" marker-end={a}></path>
+
+<!-- Search 1: eligibility -->
+<rect class="box-accent" x="180" y="20" width="240" height="120" rx="8"></rect>
+<text class="t-accent" x="196" y="46">{l.s1}</text>
+{l.s1_items.map((it: string, i: number) => <text class="m" x="196" y={74 + i * 20}>· {it}</text>)}
+
+<!-- eligible: search 2 -->
+<path class="edge-accent" d="M420 70 H498" marker-end={aa}></path>
+<text class="m-accent" x="459" y="60" text-anchor="middle">{l.yes}</text>
+<rect class="box" x="500" y="20" width="200" height="120" rx="8"></rect>
+<text class="t" x="516" y="46">{l.s2}</text>
+{l.s2_items.map((it: string, i: number) => <text class="m" x="516" y={74 + i * 20}>· {it}</text>)}
+
+<path class="edge" d="M700 70 H738" marker-end={a}></path>
+<rect class="box-2" x="740" y="44" width="130" height="52" rx="8"></rect>
+<text class="t-sm" x="805" y="75" text-anchor="middle">{l.out}</text>
+
+<!-- not eligible: stop -->
+<path class="edge-bad" d="M300 140 V178" marker-end={ab}></path>
+<text class="m-bad" x="312" y="164">{l.no}</text>
+<rect class="box-bad" x="200" y="180" width="200" height="44" rx="8"></rect>
+<text class="t-bad" x="300" y="207" text-anchor="middle">{l.stop}</text>
+
+<!-- Before -->
+<rect class="box-bad" x="10" y="256" width="860" height="68" rx="8"></rect>
+<text class="t-bad" x="26" y="282">{l.before}</text>
+<text class="m-bad" x="26" y="306">{l.before_note}</text>

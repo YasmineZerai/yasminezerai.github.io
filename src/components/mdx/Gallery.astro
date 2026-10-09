@@ -1,0 +1,32 @@
+---
+import { Image } from 'astro:assets';
+import { image } from '../../lib/images';
+interface Props {
+  items: { src: string; alt: string; caption: string }[];
+}
+const { items } = Astro.props;
+---
+
+<div class="my-8 grid gap-10">
+  {
+    items.map((it) => {
+      const img = image(it.src);
+      const portrait = img.height > img.width;
+      return (
+        <figure class:list={['reveal', portrait && 'sm:grid sm:grid-cols-[minmax(0,17rem)_1fr] sm:items-end sm:gap-6']}>
+          <div class:list={['overflow-hidden rounded-2xl border border-line bg-surface shadow-[var(--shadow)]', portrait && 'mx-auto max-w-[17rem] sm:mx-0']}>
+            <Image
+              src={img}
+              alt={it.alt}
+              widths={portrait ? [272, 496] : [480, 800, Math.min(img.width, 1400)]}
+              sizes={portrait ? '17rem' : '(min-width: 768px) 46rem, 100vw'}
+              loading="lazy"
+              class="h-auto w-full"
+            />
+          </div>
+          <figcaption class="mt-3 text-sm text-muted">{it.caption}</figcaption>
+        </figure>
+      );
+    })
+  }
+</div>

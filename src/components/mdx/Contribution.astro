@@ -1,0 +1,19 @@
+---
+import { getUi } from '../../lib/content';
+interface Props {
+  title: string;
+  date: string;
+}
+const { title, date } = Astro.props;
+const ui = await getUi();
+---
+
+<section class="reveal tilt card my-8 overflow-hidden border-2 !border-c">
+  <header class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 bg-c-soft px-5 py-4 sm:px-6">
+    <h3 class="text-xl font-bold tracking-tight">{title}</h3>
+    <p class="font-mono text-xs font-semibold text-c-strong">{ui.my_part} · {date}</p>
+  </header>
+  <div class="divide-y divide-line">
+    <slot />
+  </div>
+</section>
