@@ -1,6 +1,5 @@
 ---
 import '../styles/global.css';
-import ThemeToggle from '../components/ThemeToggle.astro';
 import { getUi } from '../lib/content';
 
 interface Props {
@@ -22,7 +21,7 @@ const nav = [
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -31,8 +30,8 @@ const nav = [
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
-    <meta name="theme-color" content="#fafaf8" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0f1115" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#13111c" />
+    <meta name="color-scheme" content="dark" />
     <meta property="og:type" content={ogType} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
@@ -47,12 +46,6 @@ const nav = [
       (function () {
         var d = document.documentElement;
         d.classList.add('js');
-        var t = null;
-        try { t = localStorage.getItem('theme'); } catch (e) {}
-        if (t !== 'light' && t !== 'dark') {
-          t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        }
-        d.setAttribute('data-theme', t);
       })();
     </script>
   </head>
@@ -80,7 +73,6 @@ const nav = [
               ))
             }
           </ul>
-          <ThemeToggle label={ui.theme_toggle} />
         </nav>
       </div>
     </header>
