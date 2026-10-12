@@ -1,0 +1,18 @@
+---
+interface Props {
+  items: { value: string; label: string }[];
+}
+const { items } = Astro.props;
+const colors = ['c-lilac', 'c-peach', 'c-mint', 'c-sky'];
+---
+
+<ul class="my-8 grid grid-cols-2 gap-3 sm:grid-cols-4" data-stagger>
+  {
+    items.map((it, i) => (
+      <li class:list={['reveal glass relative isolate overflow-hidden rounded-2xl px-4 py-4', colors[i % colors.length]]}>
+        <p class="font-mono text-2xl font-bold tracking-tight text-c-strong">{it.value}</p>
+        <p class="mt-1 text-sm text-muted">{it.label}</p>
+      </li>
+    ))
+  }
+</ul>

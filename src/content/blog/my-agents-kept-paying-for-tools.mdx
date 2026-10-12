@@ -1,0 +1,176 @@
+---
+title: "My agents kept paying for tools they never used"
+date: 2026-10-12
+subtitle: "What I found running a team of AI agents 78 times through loopview, the debugger I built for them."
+description: "I ran a team of AI agents 78 times through loopview, the open-source debugger I built. Half the bill was tool definitions the model never used."
+tags: ["loopview", "MCP", "agents", "observability"]
+color: "lilac"
+cover: "blog/cover-tools.png"
+coverAlt: "Chart of the GitHub MCP server test: of the 28 tools sent to the model on every call, 14 were used and 14 never were, and tool definitions made up 51% of the input tokens."
+---
+
+## Why I built loopview
+
+Working with AI agents, I kept doing the same thing: digging through traces to figure out what happened. What was the agent thinking? Which tools did it call, with which parameters? Which agent did it hand the job to? Which tool failed? How much did each agent cost?
+
+Reading through logs with my -6 vision was nothing short of painful. The tools that already existed made me create an account, only worked with one framework, or took an afternoon to set up. So I built the thing I wanted.
+
+loopview is a local, open-source debugger for AI agents. You run your agent, and it draws the run as a graph while it happens: agents as groups, steps as cards, parallel branches side by side, loops with a counter, handoffs between agents. Failed tool calls turn red. You can open any step to read what the model saw and answered, and replay the whole run afterwards.
+
+<AnimatedFigure
+  poster="loopview/demo-poster.png"
+  src="/loopview-demo.webp"
+  alt="loopview replaying a multi-agent run: a supervisor splits the work, three analysts run in parallel, a tool fails and is retried, a critic sends the draft back, a writer finishes."
+  caption="loopview replaying a multi-agent run."
+/>
+
+It reads standard OpenTelemetry traces, the ones agent frameworks already know how to send, so the same view works for Pydantic AI, LangGraph, CrewAI, the OpenAI Agents SDK and loops you write yourself. It runs on your machine: one command, no account, nothing sent anywhere.
+
+<Install command="uvx loopview demo" />
+
+It's my first published package. Two, actually: `loopview` itself, and `loopview-sdk`, which connects a Python agent in one line.
+
+<Callout icon="sparkles" title="For my fellow vibe coders">
+There's a ready-made prompt in the README: paste it into your coding agent and it plugs loopview into your project for you.
+
+<LinkRow links={[
+  { label: "Get the prompt", href: "https://github.com/YasmineZerai/loopview#set-it-up-with-your-coding-agent" },
+]} />
+</Callout>
+
+Read more about loopview's features in [the loopview case study](/work/loopview).
+
+## Pointing it at something real
+
+A debugger is easy to love on your own demo agents. You wrote them, you know what they do, nothing surprises you. I wanted to know if loopview could show me something I didn't already know, so I built something real to point it at.
+
+The agent is a small team that reads a GitHub bug report and looks for the file where the bug lives:
+
+- a **supervisor** reads the issue and splits the work
+- a **code detective** searches the code, through GitHub's MCP server
+- a **historian** looks for related issues, pull requests and commits, also through GitHub
+- a **docs checker** reads the documentation, through DeepWiki and Context7 (two more MCP servers)
+- a **writer** puts it all together
+
+The three investigators run in parallel, which looks great in the graph. I used real bugs that were already fixed, in uv, pydantic-ai, LangGraph and the OpenAI Agents SDK, so the files changed by the fix tell me whether the team found the right place. The agents read the code as it was before the fix, so they can't just read the answer.
+
+I ran it 78 times with Claude Haiku 5.5.
+
+<Stats
+  items={[
+    { value: "78", label: "runs" },
+    { value: "523", label: "model calls" },
+    { value: "782", label: "tool calls" },
+    { value: "$3.78", label: "in total" },
+  ]}
+/>
+
+<Shot
+  src="blog/triage-run.png"
+  alt="A triage run in loopview: the supervisor, three investigators running in parallel, and the writer."
+  caption="A triage run in loopview."
+/>
+
+## What 78 runs show that one run doesn't
+
+One run tells you what happened. 78 runs tell you how your tools actually behave. That's what loopview's Tools tab is for: it puts every tool call from every run in one place.
+
+<Shot
+  src="blog/tools-tab.png"
+  alt="loopview's Tools tab over the 78 runs: tools sorted by errors, with what the agent did after each failure."
+  caption="The Tools tab over the 78 runs."
+/>
+
+<Finding n="1" icon="target" color="peach" title="Errors concentrate">
+  33 of the 782 calls failed, and two tools caused two thirds of them:
+  `get_file_contents` (read a file) and `search_code`. Mostly wrong file paths,
+  a few searches GitHub couldn't parse, and some rate limits that were my own
+  fault, because I ran too many agents at once.
+</Finding>
+
+<Finding n="2" icon="refresh" color="mint" title="The agents recovered well">
+  loopview looks at what the agent did in its next turn after each failure. When
+  `get_file_contents` failed (15 times), the agent fixed its arguments 8 times,
+  and 7 of those worked. It switched to another tool twice and gave up 5 times.
+  In all 78 runs, it never retried the exact same call blindly. I honestly
+  expected worse.
+</Finding>
+
+<Finding n="3" icon="x-circle" color="peach" title="One tool never worked">
+  DeepWiki's `read_wiki_contents` failed every time it was called: its results
+  were bigger than the 1 MB the MCP client accepts. Twice, the agent switched to
+  Context7 instead.
+</Finding>
+
+<Finding n="4" icon="stack" color="sky" title="Some results are huge">
+  `get_file_contents` returned about 19,000 tokens per call on average. And a
+  result doesn't go away once it's read: it stays in the conversation and gets
+  paid for again on every later call.
+</Finding>
+
+<Finding n="5" icon="eye" color="mint" title="The one I didn't see coming">
+  **18 tools were sent to the model on every call and never used once.**
+  `list_issues`, `list_pull_requests`, `run_secret_scanning`... A quarter of all
+  input tokens went to tool definitions, even though most of the input (62%)
+  came from the prompt cache.
+</Finding>
+
+## Half the bill was the menu
+
+I wanted to check this wasn't just my setup. So I took GitHub's official MCP server alone, in read-only mode, and asked a simple agent 20 easy questions about public repos (Claude Haiku 4.5 this time).
+
+<BigNumber value="51%" label="of the input tokens were tool descriptions">
+  The model got all 28 tools on every call and used 14.
+</BigNumber>
+
+<PullQuote>
+  It's like reading the whole IKEA catalogue out loud every time you want a
+  chair.
+</PullQuote>
+
+That's how MCP works by default: you connect a server, and its whole catalogue goes to the model on every call, whether the agent needs it or not.
+
+## What this means if you build agents
+
+This left me with a question: does an agent really need to know about every tool on a server when it only uses a few?
+
+No. Your code has to ask the server for its list once, and that's cheap. What costs money is sending all those definitions to the model on every call, and that part can be avoided. I found four ways, from the simplest to the smartest.
+
+<Finding n="1" icon="filter" color="mint" title="Pick the tools in your own code">
+Your code gets the full list and only hands the model the ones you choose. In Pydantic AI, that's a filter on the toolset. It's simple and free, but you have to know in advance what each agent needs. My triage team already has this as an option, where each agent only gets the tools for its job. I haven't run it yet, it's next.
+</Finding>
+
+<Finding n="2" icon="server" color="sky" title="Ask the server for fewer tools">
+Some servers let you choose: GitHub's takes a header listing the tools you want ([`X-MCP-Tools`](https://github.blog/changelog/2025-12-10-the-github-mcp-server-adds-support-for-tool-specific-configuration-and-more)). Same limit as the first one: you decide up front.
+</Finding>
+
+<Finding n="3" icon="search" color="peach" title="Let the model search for tools">
+The model starts with a single search tool. When it needs something, it searches, and only the few tools that match get loaded in full. Anthropic's API supports this for MCP tools on recent Claude models, and Claude Code works this way too. **The catch:** one extra step every time the agent needs a new tool, and the search can miss the right one.
+</Finding>
+
+<Finding n="4" icon="code" color="mint" title="Turn the tools into code">
+Anthropic's engineering team showed another approach: each MCP server becomes a folder of code files, one per tool, and the agent reads only the files it needs, then calls the tools from code. It can also filter big results in code before they reach the model. In their example, that took the token count from about 150,000 to about 2,000. **The catch:** the agent needs a safe place to run code.
+</Finding>
+
+For me, the lesson is that the tool list is part of the agent's design. Every tool you give the model costs tokens on every call, and it's one more thing the model can pick by mistake. A team of agents makes this easier, because each agent can get only the tools for its own job.
+
+And before cutting anything, look at what your agents actually use. That's what loopview's "Never called" list is for: the tools you pay for and never use, with what they cost.
+
+## Limits
+
+- loopview splits each call's cost into system prompt, tool definitions, history and so on. The totals come from the provider and are exact; the split is an estimate, and every estimated number in the UI says so.
+- My estimate is calibrated on Claude Haiku 4.5 and runs a bit low on Haiku 5.5, so the unused-tools figures from my team are, if anything, too low.
+- loopview only counts an error when the trace marks it as one. A tool that returns "Error: not found" as a normal result counts as a success. I chose that on purpose: no guessing.
+- 19 of the 78 runs didn't finish: 11 because an MCP server wouldn't connect, 7 because the connection to the model dropped or timed out, 1 because a search hit its retry limit. That's MCP in real life too.
+- 78 runs of one app is a small sample. The point isn't the exact percentages, it's that you can see any of this at all.
+
+## Try it
+
+<Install command="uvx loopview demo" />
+
+That opens a recorded multi-agent run, no API key needed. To watch your own agent: `pip install loopview-sdk`, then call `loopview_sdk.connect()` at the start of your program.
+
+- Live demo in your browser: [yasminezerai.github.io/loopview](https://yasminezerai.github.io/loopview/)
+- Code: [github.com/YasmineZerai/loopview](https://github.com/YasmineZerai/loopview)
+
+If you try it on your own agents, I'd really like to know what you find.

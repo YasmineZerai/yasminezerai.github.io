@@ -1,0 +1,46 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { getUi } from '../lib/content';
+import { formatDate, readingMinutes } from '../lib/blog';
+import { Image } from 'astro:assets';
+import { image } from '../lib/images';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+const { post } = Astro.props;
+const ui = await getUi();
+const cover = post.data.cover ? image(post.data.cover) : undefined;
+---
+
+<article class:list={['reveal tilt glass group relative isolate overflow-hidden rounded-3xl', `c-${post.data.color}`]}>
+  {
+    cover && (
+      <div class="overflow-hidden border-b border-white/10">
+        <Image src={cover} alt="" widths={[480, 800]} sizes="(min-width: 1024px) 34rem, 100vw" loading="lazy" class="aspect-[16/8] w-full object-cover object-top transition-transform duration-700 group-hover:scale-[1.04]" />
+      </div>
+    )
+  }
+  <div class="p-6 sm:p-8">
+  <p class="eyebrow">
+    <time datetime={post.data.date.toISOString().slice(0, 10)}>{formatDate(post.data.date)}</time> · {`${readingMinutes(post)} ${ui.blog_min_read}`}
+  </p>
+  <h3 class="mt-3 font-display text-2xl leading-tight font-bold tracking-tight sm:text-3xl">
+    <a href={`/blog/${post.id}`} class="after:absolute after:inset-0">{post.data.title}</a>
+  </h3>
+  {post.data.subtitle && <p class="mt-3 max-w-2xl text-[1.0625rem] leading-relaxed text-muted">{post.data.subtitle}</p>}
+  {
+    post.data.tags.length > 0 && (
+      <ul class="mt-5 flex flex-wrap gap-1.5" aria-label="Tags">
+        {post.data.tags.map((t) => (
+          <li class="glass-tag">{t}</li>
+        ))}
+      </ul>
+    )
+  }
+  <p class="mt-6 inline-flex items-center gap-1.5 font-semibold text-c-strong">
+    {ui.blog_read}
+    <span aria-hidden="true" class="inline-block transition-transform group-hover:translate-x-1.5">→</span>
+  </p>
+  </div>
+</article>

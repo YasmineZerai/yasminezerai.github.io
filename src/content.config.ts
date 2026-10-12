@@ -110,4 +110,20 @@ const ui = defineCollection({
   schema: z.record(z.string(), z.string()),
 });
 
-export const collections = { home, work, diagrams, ui };
+// Blog posts: src/content/blog/<slug>.mdx, served at /blog/<slug>.
+const blog = defineCollection({
+  loader: glob({ pattern: '*.{md,mdx}', base: './src/content/blog' }),
+  schema: z.object({
+    title: z.string(),
+    date: z.coerce.date(),
+    description: z.string(),
+    subtitle: z.string().optional(),
+    tags: z.array(z.string()).default([]),
+    color: z.enum(['peach', 'mint', 'lilac', 'sky']).default('lilac'),
+    cover: z.string().optional(),
+    coverAlt: z.string().optional(),
+    draft: z.boolean().default(false),
+  }),
+});
+
+export const collections = { home, work, diagrams, ui, blog };

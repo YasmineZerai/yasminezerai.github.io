@@ -295,6 +295,25 @@
   background: var(--c-soft, var(--surface-2));
 }
 
+/* Tables and code blocks in posts and case studies */
+.prose table {
+  width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.9375rem;
+  border: 1px solid var(--border); border-radius: 1rem; overflow: hidden;
+}
+@media (max-width: 640px) { .prose table { font-size: 0.8125rem; } .prose th, .prose td { padding: 0.6rem 0.65rem; } }
+.prose thead th {
+  background: var(--c-soft, var(--surface-2)); color: var(--c-strong, var(--text));
+  font-family: var(--ff-mono); font-size: 0.75rem; font-weight: 650; text-align: left;
+}
+.prose th, .prose td { padding: 0.7rem 1rem; vertical-align: top; }
+.prose tbody tr + tr td { border-top: 1px solid var(--border); }
+.prose tbody td { background: var(--surface); }
+.prose pre {
+  border-radius: 1rem; padding: 1rem 1.25rem; overflow-x: auto;
+  font-family: var(--ff-mono); font-size: 0.875rem; line-height: 1.6;
+  border: 1px solid var(--border);
+}
+
 /* ---------- Diagram language ---------- */
 .dg { font-family: var(--ff-sans); }
 .dg .box { fill: var(--d-fill); stroke: var(--d-stroke); stroke-width: 1.25; }

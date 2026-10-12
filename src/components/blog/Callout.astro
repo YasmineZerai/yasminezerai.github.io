@@ -1,0 +1,30 @@
+---
+import Icon from './Icon.astro';
+interface Props {
+  title: string;
+  icon?: string;
+  color?: 'peach' | 'mint' | 'sky' | 'lilac';
+}
+const { title, icon = 'sparkles', color = 'peach' } = Astro.props;
+---
+
+<aside class:list={['callout reveal relative my-8 overflow-hidden rounded-3xl p-5 sm:p-6', `c-${color}`]}>
+  <div class="flex items-start gap-4">
+    <span class="grid size-11 shrink-0 place-items-center rounded-2xl bg-c-strong text-[#13111c]" aria-hidden="true">
+      <Icon name={icon} class="size-[22px]" />
+    </span>
+    <div class="callout-body min-w-0">
+      <p class="font-display text-lg font-bold text-c-strong">{title}</p>
+      <slot />
+    </div>
+  </div>
+</aside>
+
+<style>
+  .callout {
+    background: linear-gradient(135deg, color-mix(in oklab, var(--c-strong) 16%, transparent), color-mix(in oklab, var(--c-strong) 4%, transparent));
+    border: 1px dashed color-mix(in oklab, var(--c-strong) 55%, transparent);
+  }
+  .callout-body > :global(p:not(:first-child)) { margin-top: 0.4rem; }
+  .callout-body :global(div.my-6) { margin: 0.9rem 0 0; }
+</style>

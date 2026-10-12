@@ -1,0 +1,154 @@
+---
+import { render } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import PostCard from '../../components/PostCard.astro';
+import { getUi } from '../../lib/content';
+import { image } from '../../lib/images';
+import { getPosts, formatDate, readingMinutes } from '../../lib/blog';
+import profile from '../../assets/profile-square.jpg';
+import Figure from '../../components/mdx/Figure.astro';
+import AnimatedFigure from '../../components/mdx/AnimatedFigure.astro';
+import Install from '../../components/mdx/Install.astro';
+import LinkRow from '../../components/mdx/LinkRow.astro';
+import Note from '../../components/mdx/Note.astro';
+import Shot from '../../components/mdx/Shot.astro';
+import Gallery from '../../components/mdx/Gallery.astro';
+import Finding from '../../components/blog/Finding.astro';
+import Stats from '../../components/blog/Stats.astro';
+import PullQuote from '../../components/blog/PullQuote.astro';
+import BigNumber from '../../components/blog/BigNumber.astro';
+import Callout from '../../components/blog/Callout.astro';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content, headings } = await render(post);
+const toc = headings.filter((h) => h.depth === 2);
+const ui = await getUi();
+const others = (await getPosts()).filter((p) => p.id !== post.id).slice(0, 2);
+const cover = post.data.cover ? image(post.data.cover) : undefined;
+const components = { Figure, AnimatedFigure, Install, LinkRow, Note, Shot, Gallery, Finding, Stats, PullQuote, BigNumber, Callout };
+---
+
+<Base title={`${post.data.title} · Yasmine Zerai`} description={post.data.description} ogType="article">
+  <div class="read-progress fixed top-0 left-0 z-50 h-[3px] w-full origin-left scale-x-0 bg-gradient-to-r from-[var(--peach)] via-[var(--lilac)] to-[var(--mint)]" aria-hidden="true"></div>
+
+  <article class={`c-${post.data.color}`}>
+    <header class="relative isolate overflow-hidden">
+      <div class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(60%_80%_at_15%_0%,var(--c-soft),transparent_70%),radial-gradient(50%_70%_at_95%_30%,var(--peach-soft),transparent_70%)]" aria-hidden="true"></div>
+      <div class="container-page grid items-center gap-10 pt-10 pb-14 sm:pt-16 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:pb-20">
+        <div>
+          <a href="/blog" class="inline-flex min-h-11 items-center gap-1.5 font-mono text-sm font-semibold text-c-strong hover:underline">← {ui.blog_back}</a>
+          <h1 class="mt-4 font-display text-4xl leading-[1.04] font-extrabold tracking-[-0.03em] sm:text-5xl lg:text-6xl">{post.data.title}</h1>
+          {post.data.subtitle && <p class="mt-5 text-lg leading-relaxed text-muted sm:text-xl">{post.data.subtitle}</p>}
+          <div class="mt-7 flex flex-wrap items-center gap-x-4 gap-y-3">
+            <span class="flex items-center gap-3">
+              <Image src={profile} alt="" widths={[48, 96]} sizes="44px" class="size-11 rounded-full object-cover ring-2 ring-c" />
+              <span class="leading-tight">
+                <span class="block font-semibold">Yasmine Zerai</span>
+                <span class="block font-mono text-xs text-muted">
+                  <time datetime={post.data.date.toISOString().slice(0, 10)}>{formatDate(post.data.date)}</time> · {`${readingMinutes(post)} ${ui.blog_min_read}`}
+                </span>
+              </span>
+            </span>
+          </div>
+          {
+            post.data.tags.length > 0 && (
+              <ul class="mt-6 flex flex-wrap gap-1.5" aria-label="Tags">
+                {post.data.tags.map((t) => (
+                  <li class="glass-tag">{t}</li>
+                ))}
+              </ul>
+            )
+          }
+        </div>
+        {
+          cover && (
+            <div class="relative mx-auto w-full max-w-xl lg:max-w-none">
+              <div class="absolute -inset-3 -z-10 rotate-2 rounded-[2rem] bg-gradient-to-br from-[var(--lilac)] via-[var(--peach)] to-[var(--mint)] opacity-60 blur-xl" aria-hidden="true" />
+              <div class="overflow-hidden rounded-3xl border border-white/15 shadow-2xl transition-transform duration-500 hover:-rotate-1 lg:rotate-1">
+                <Image src={cover} alt={post.data.coverAlt ?? ''} widths={[600, 900, 1300]} sizes="(min-width: 1024px) 34rem, 100vw" loading="eager" fetchpriority="high" class="h-auto w-full" />
+              </div>
+            </div>
+          )
+        }
+      </div>
+    </header>
+
+    <div class="container-page relative xl:grid xl:grid-cols-[minmax(0,1fr)_46rem_minmax(0,1fr)] xl:gap-10">
+      {
+        toc.length > 0 && (
+          <aside class="hidden xl:col-start-3 xl:row-start-1 xl:block" aria-label="On this page">
+            <nav class="toc sticky top-24 mt-10">
+              <p class="eyebrow">On this page</p>
+              <ol class="mt-4 space-y-1 border-l border-line">
+                {toc.map((h) => (
+                  <li>
+                    <a href={`#${h.slug}`} data-toc={h.slug} class="-ml-px block border-l-2 border-transparent py-1.5 pl-4 text-sm text-muted transition-colors hover:text-ink">
+                      {h.text}
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </nav>
+          </aside>
+        )
+      }
+      <div class="prose post mt-10 xl:col-start-2 xl:row-start-1 xl:mx-0 max-w-[46rem] mx-auto">
+        <Content components={components} />
+      </div>
+    </div>
+
+    <div class="container-text mt-20">
+      <div class="glass c-lilac relative isolate flex flex-col items-start gap-5 overflow-hidden rounded-3xl p-6 sm:flex-row sm:items-center sm:p-8">
+        <Image src={profile} alt="" widths={[72, 144]} sizes="72px" class="size-[72px] shrink-0 rounded-full object-cover ring-2 ring-c" />
+        <div>
+          <p class="font-display text-lg font-bold">Written by Yasmine Zerai</p>
+          <p class="mt-1 text-muted">AI engineer and final-year Software Engineering student. I build LLM agents that run in production, and loopview to debug them.</p>
+          <p class="mt-3 flex flex-wrap gap-2">
+            <a href="/" class="btn">Portfolio</a>
+            <a href="https://github.com/YasmineZerai/loopview" class="btn">loopview on GitHub</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    {
+      others.length > 0 && (
+        <nav class="container-text mt-16 grid gap-6" aria-label={ui.blog_more}>
+          <p class="eyebrow">{ui.blog_more}</p>
+          {others.map((p) => (
+            <PostCard post={p} />
+          ))}
+        </nav>
+      )
+    }
+  </article>
+</Base>
+
+<script>
+  const bar = document.querySelector<HTMLElement>('.read-progress');
+  const post = document.querySelector<HTMLElement>('.post');
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-toc]')];
+  const heads = links.map((l) => document.getElementById(l.dataset.toc ?? '')).filter(Boolean) as HTMLElement[];
+  const update = () => {
+    if (bar && post) {
+      const r = post.getBoundingClientRect();
+      const p = Math.min(1, Math.max(0, -r.top / Math.max(1, r.height - innerHeight)));
+      bar.style.transform = `scaleX(${p})`;
+    }
+    let current = heads[0]?.id;
+    for (const h of heads) if (h.getBoundingClientRect().top < 140) current = h.id;
+    links.forEach((l) => l.classList.toggle('is-active', l.dataset.toc === current));
+  };
+  addEventListener('scroll', update, { passive: true });
+  update();
+</script>
+
+<style>
+  .toc :global(a.is-active) { color: var(--text); border-color: var(--c-strong); font-weight: 600; }
+</style>
