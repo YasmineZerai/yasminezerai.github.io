@@ -40,13 +40,13 @@ beekeeper-agent:
 
 beekeeper-mqtt:
   title: "The MQTT service"
-  caption: "One listener, separate from the API, takes every device message off the broker without blocking. Commands go the other way and wait for a sleeping device."
-  alt: "Diagram. Devices exchange messages with an MQTT broker. A single listener service, separate from the API, receives them: retained and invalid messages are dropped, telemetry updates the device's live state in MongoDB, and alerts go out by WhatsApp and email. The API publishes commands (hibernate, wake, planned move) to the broker, retained so a sleeping device receives them when it wakes."
+  caption: "A listener service, separate from the API, takes every device message off the broker without blocking. Commands go the other way and wait for a sleeping device."
+  alt: "Diagram. Devices exchange messages with an MQTT broker. A listener service, separate from the API, receives them: retained and invalid messages are dropped, telemetry updates the device's live state in MongoDB, and alerts go out by WhatsApp and email. The API publishes commands (hibernate, wake, planned move) to the broker, retained so a sleeping device receives them when it wakes."
   labels:
     devices: "Devices"
     broker: "MQTT broker"
     listener: "Listener service"
-    listener_note: ["one subscriber,", "separate from the API"]
+    listener_note: ["its own service,", "separate from the API"]
     filter: "skip retained · validate"
     state: "Live device state"
     state_note: "newer data wins"
@@ -127,7 +127,7 @@ beekeeper-pipeline-thumb:
   caption: ""
   alt: ""
   labels:
-    devices: "2,000+ devices"
+    devices: "Every device"
     rules: "Rule engine"
     agent: "AI agent"
     controls: "Volume controls"
@@ -146,13 +146,13 @@ pfa-architecture-thumb:
 beekeeper-contributions:
   title: "Brood Presence Confidence, built from the fleet's data"
   caption: "An illustration of the method, not real values: what was compared, not how it is computed."
-  alt: "Pipeline diagram. Step 1, data: historical recordings from 2,000+ devices go through exploratory analysis (many hives scoring near zero without being sick), correlation analysis between brood, hive and outside temperatures, and a gradient-boosted regression of hive readings on outside weather. Step 2, features: three brood behaviours, a narrow temperature band, being warmer than the hive, and being shielded from outside swings. Step 3: they combine into a confidence c between 0 and 1; when c drops, brood penalties drop, giving uncertainty instead of a false alarm. Step 4: checked against the fleet, where a decline on many devices at once from mid-October matched the end of the brood season, not sensor faults."
+  alt: "Pipeline diagram. Step 1, data: historical recordings from the whole fleet go through exploratory analysis (many hives scoring near zero without being sick), correlation analysis between brood, hive and outside temperatures, and a gradient-boosted regression of hive readings on outside weather. Step 2, features: three brood behaviours, a narrow temperature band, being warmer than the hive, and being shielded from outside swings. Step 3: they combine into a confidence c between 0 and 1; when c drops, brood penalties drop, giving uncertainty instead of a false alarm. Step 4: checked against the fleet, where a decline on many devices at once from mid-October matched the end of the brood season, not sensor faults."
   labels:
     h1: "1 · Data"
     h2: "2 · Features"
     h3: "3 · Confidence"
     d1: "Historical fleet recordings"
-    d1_note: "2,000+ devices · sensor time series"
+    d1_note: "whole fleet · sensor time series"
     d2: "EDA"
     d2_note: "many hives near 0, not actually sick"
     d3: "Correlation analysis (Pearson, Spearman)"

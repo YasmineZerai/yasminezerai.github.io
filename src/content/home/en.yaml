@@ -19,7 +19,7 @@ hero:
   headline: "AI Engineer. I build LLM agents that run in production, and the tools to debug them."
   intro: "I'm a **final-year Software Engineering student** at INSAT and an **AI engineer**. I build **LLM agents**, **RAG** systems and the backends around them, and I've shipped them to **production** and to **open source**. I care about **AI you can trust**: agents that look before they act, and answers you can trace back to their evidence."
   proof:
-    - { count: 2000, suffix: "+", label: "IoT devices on the platform I built", color: "peach" }
+    - { count: 100, suffix: "%", label: "of manual sensor review replaced by my AI agent", color: "peach" }
     - { count: 1, suffix: " year+", label: "of professional AI engineering experience", color: "mint" }
     - { count: 2, suffix: "", label: "open-source packages published on PyPI", color: "lilac" }
   availability: "Open to relocation · Available January or February 2027"
@@ -46,7 +46,7 @@ work:
           - { src: "beekeeper/office-selfie.jpg", alt: "Me at the Beekeeper Tech office, pointing at the company logo on the wall.", position: "70% 30%" }
           - { src: "beekeeper/platform-sunset-v2.jpg", alt: "The platform's sign-in screen on my laptop, with the office terrace at sunset behind it.", position: "50% 72%" }
       summary: "I built and owned the production platform of an IoT startup for bee colony monitoring: the MQTT link to the hives, the AI agent and the health score."
-      badges: ["2,000+ devices", "Agent in production"]
+      badges: ["Thousands of IoT devices", "Agent in production"]
       proof:
         - "My ReAct agent **replaced the manual review of sensor data completely**"
         - "My **Brood Presence Confidence** model, calibrated on the fleet's sensor history, is **in production**"
